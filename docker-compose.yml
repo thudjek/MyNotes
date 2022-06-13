@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  api:
+    image: ${DOCKER_REGISTRY-}api
+    env_file: .env
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+    ports:
+      - 5000:80
+      - 5002:443
+  db:
+    image: ${DOCKER_REGISTRY-}db
+    build:
+      context: ./Infrastructure/Db
+      dockerfile: Dockerfile
+    ports:
+      - 1433:1433
+    volumes:
+      - ./Infrastructure/Db/VolumeData:/var/opt/mssql/data
+  seq:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - 8081:80

@@ -1,0 +1,25 @@
+﻿using Application.Common;
+using Application.Common.Interfaces;
+using Application.Dtos.Auth;
+using MediatR;
+
+namespace Application.Features.Auth.Commands;
+public class RefreshTokenCommand : IRequest<Result<TokenDto>>
+{
+    public string AccessToken { get; set; }
+    public string RefreshToken { get; set; }
+}
+
+public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, Result<TokenDto>>
+{
+    private readonly IIdentityService _identityService;
+    public RefreshTokenCommandHandler(IIdentityService identityService)
+    {
+        _identityService = identityService;
+    }
+
+    public Task<Result<TokenDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    {
+        return _identityService.RefreshToken(request.AccessToken, request.RefreshToken);
+    }
+}

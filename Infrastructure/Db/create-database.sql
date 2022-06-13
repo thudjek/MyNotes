@@ -1,0 +1,5 @@
+IF DB_ID('MyNotes') IS NULL
+BEGIN
+CREATE DATABASE [MyNotes]
+END
+GO
