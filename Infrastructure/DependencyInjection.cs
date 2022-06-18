@@ -17,6 +17,7 @@ public static class DependencyInjection
             options.UseSqlServer(configuration["Database:ConnectionString"], b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
         services.AddScoped<IAppDbContext, AppDbContext>();
+        services.AddScoped<DatabaseInitializer>();
 
         services.AddIdentity<User, IdentityRole<int>>(options => 
         {

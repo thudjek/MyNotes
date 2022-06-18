@@ -22,7 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Data\Migrations\" />
     <Folder Include="Db\VolumeData\" />
+    <Folder Include="Identity\Events\" />
     <Folder Include="Models\" />
   </ItemGroup>
 

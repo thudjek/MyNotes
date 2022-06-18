@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Common;
+using Domain.Entities;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -9,10 +10,20 @@ using System.Reflection;
 namespace Infrastructure.Data;
 public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IAppDbContext
 {
+    private readonly IDateTimeService _dateTimeService;
+    private readonly ICurrentUserService _currentUserService;
+    public AppDbContext(DbContextOptions<AppDbContext> options, IDateTimeService dateTimeService, ICurrentUserService currentUserService) : base(options)
+    {
+        _dateTimeService = dateTimeService;
+        _currentUserService = currentUserService;
+    }
+
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
-
     }
+
+    public DbSet<Note> Notes => Set<Note>();
+    public DbSet<Permission> Permissions => Set<Permission>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
@@ -21,11 +32,13 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IAp
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.DateCreated = DateTime.Now;
+                    entry.Entity.CreatedBy = _currentUserService.UserId;
+                    entry.Entity.DateCreated = _dateTimeService.Now;
                     break;
 
                 case EntityState.Modified:
-                    entry.Entity.DateModified = DateTime.Now;
+                    entry.Entity.ModifiedBy = _currentUserService.UserId;
+                    entry.Entity.DateModified = _dateTimeService.Now;
                     break;
             }
         }
@@ -38,6 +51,18 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IAp
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         base.OnModelCreating(builder);
+        IdentityConfiguration(builder);
+    }
+
+    private static void IdentityConfiguration(ModelBuilder builder)
+    {
+        builder.Entity<User>().Property(u => u.Email)
+            .HasMaxLength(50)
+            .IsRequired();
+
+        builder.Entity<User>().Property(u => u.UserName)
+            .HasMaxLength(50)
+            .IsRequired();
 
         builder.Entity<User>().ToTable("Users");
         builder.Entity<IdentityRole<int>>().ToTable("Roles");

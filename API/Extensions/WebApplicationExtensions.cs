@@ -25,6 +25,11 @@ public static class WebApplicationExtensions
                         context.Response.StatusCode = 400;
                         await context.Response.WriteAsync(errorModel.ToJson());
                         break;
+                    case NotFoundException ex:
+                        errorModel.Message = ex.Message;
+                        context.Response.StatusCode = 404;
+                        await context.Response.WriteAsync(errorModel.ToJson());
+                        break;
                     default:
                         context.Response.StatusCode = 500;
                         await context.Response.WriteAsync(errorModel.ToJson());

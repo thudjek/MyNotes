@@ -1,6 +1,5 @@
 ﻿using Application.Features.Auth.Commands;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;

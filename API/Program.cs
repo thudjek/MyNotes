@@ -6,7 +6,9 @@ using Serilog.Events;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using API.Extensions;
-using Microsoft.AspNetCore.Identity;
+using Application.Common.Interfaces;
+using API.Services;
+using Infrastructure.Data;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -27,7 +29,7 @@ try
 
     var app = builder.Build();
 
-    ConfigureMiddleware(app, app.Services);
+    await ConfigureMiddleware(app, app.Services);
 
     app.Run();
 }
@@ -46,14 +48,12 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.AddApplicationServices();
     services.AddInfrastructureServices(configuiration);
 
+    services.AddSingleton<ICurrentUserService, CurrentUserService>();
+
     services.AddControllers();
     services.AddRouting(options => options.LowercaseUrls = true);
     services.AddEndpointsApiExplorer();
     services.AddSwaggerGen();
-
-    var iss = configuiration["JWT:ValidIssuer"];
-    var aud = configuiration["JWT:ValidAudience"];
-    var key = configuiration["JWT:Secret"];
 
     services.AddAuthentication(options =>
     {
@@ -89,12 +89,19 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     });
 }
 
-static void ConfigureMiddleware(WebApplication app, IServiceProvider services) 
+static async Task ConfigureMiddleware(WebApplication app, IServiceProvider services) 
 {
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
         app.UseSwaggerUI();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var databaseInitializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
+            await databaseInitializer.InitializeDatabase();
+            await databaseInitializer.SeedAsync();
+        }
     }
     else
     {
@@ -112,7 +119,6 @@ static void ConfigureMiddleware(WebApplication app, IServiceProvider services)
     app.UseSerilogRequestLogging();
 
     app.UseHttpsRedirection();
-
 
     app.UseExceptionHandling();
 
