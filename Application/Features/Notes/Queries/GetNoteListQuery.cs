@@ -1,15 +1,15 @@
 ﻿using Application.Common.Interfaces;
-using Application.Dtos.Notes;
-using Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using SharedModels.Enums;
+using SharedModels.Responses.Notes;
 
 namespace Application.Features.Notes.Queries;
-public class GetNoteListQuery : IRequest<List<NoteDto>>
+public class GetNoteListQuery : IRequest<List<NoteResponse>>
 {
 }
 
-public class GetNoteListQueryHandler : IRequestHandler<GetNoteListQuery, List<NoteDto>>
+public class GetNoteListQueryHandler : IRequestHandler<GetNoteListQuery, List<NoteResponse>>
 {
     private readonly IAppDbContext _dbContext;
     private readonly ICurrentUserService _currentUserService;
@@ -19,13 +19,13 @@ public class GetNoteListQueryHandler : IRequestHandler<GetNoteListQuery, List<No
         _currentUserService = currentUserService;
     }
 
-    public async Task<List<NoteDto>> Handle(GetNoteListQuery request, CancellationToken cancellationToken)
+    public async Task<List<NoteResponse>> Handle(GetNoteListQuery request, CancellationToken cancellationToken)
     {
-        var notes = await _dbContext.Notes
+        var noteResponseList = await _dbContext.Notes
             .Include(n => n.Permissions)
             .Where(n => n.CreatedBy == _currentUserService.UserId || 
-                        n.Permissions.Any(p => p.Email == _currentUserService.Email && (p.Scope == PermissionScope.Read || p.Scope == PermissionScope.ReadAndWrite)))
-            .Select(n => new NoteDto()
+                        n.Permissions.Any(p => p.Email == _currentUserService.Email && (p.Scope == (int)PermissionScope.Read || p.Scope == (int)PermissionScope.ReadAndWrite)))
+            .Select(n => new NoteResponse()
             {
                 Id = n.Id,
                 Title = n.Title,
@@ -34,6 +34,6 @@ public class GetNoteListQueryHandler : IRequestHandler<GetNoteListQuery, List<No
             })
             .ToListAsync(cancellationToken);
 
-        return notes;
+        return noteResponseList;
     }
 }

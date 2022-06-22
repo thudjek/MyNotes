@@ -1,11 +1,11 @@
 ﻿using Application.Common;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Dtos.Auth;
 using Application.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using SharedModels.Responses.Auth;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -26,10 +26,10 @@ public class IdentityService : IIdentityService
         _signInManager = signInManager;
     }
 
-    public async Task<RegisterResultDto> Register(string email, string password)
+    public async Task<Result> Register(string email, string password)
     {
         if (await _userManager.FindByEmailAsync(email) != null)
-            return new RegisterResultDto() { Success = false, Error = "User with that email already exists" };
+            return Result.Failure("User with that email already exists");
 
         var user = new User()
         {
@@ -41,39 +41,39 @@ public class IdentityService : IIdentityService
         if (registerResult != IdentityResult.Success)
             throw new IdentityException(registerResult.Errors.Select(e => e.Description));
 
-        return new RegisterResultDto() { Success = true }; ;
+        return Result.Success();
     }
 
-    public async Task<Result<TokenDto>> Login(string email, string password)
+    public async Task<Result<TokenResponse>> Login(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
-            return Result<TokenDto>.Failure("Wrong email or password");
+            return Result<TokenResponse>.Failure("Wrong email or password");
 
         if(!user.EmailConfirmed)
-            return Result<TokenDto>.Failure("Email is not confirmed");
+            return Result<TokenResponse>.Failure("Email is not confirmed");
 
         var claims = GetUserClaims(user);
-        var tokenDto = await GetTokensForUser(user, claims);
+        var tokenResponse = await GetTokensForUser(user, claims);
 
-        return Result<TokenDto>.Success(tokenDto);
+        return Result<TokenResponse>.Success(tokenResponse);
     }
 
-    public async Task<Result<TokenDto>> RefreshToken(string accessToken, string refreshToken)
+    public async Task<Result<TokenResponse>> RefreshToken(string accessToken, string refreshToken)
     {
         var principal = GetClaimsPrincipalFromAccessToken(accessToken);
         if (principal == null)
-            return Result<TokenDto>.Failure("Invalid access token or refresh token");
+            return Result<TokenResponse>.Failure("Invalid access token or refresh token");
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
         var user = await _userManager.FindByEmailAsync(email);
 
         if(user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= _dateTimeService.Now)
-            return Result<TokenDto>.Failure("Invalid access token or refresh token");
+            return Result<TokenResponse>.Failure("Invalid access token or refresh token");
 
-        var tokenDto = await GetTokensForUser(user, principal.Claims.ToList());
+        var tokenResponse = await GetTokensForUser(user, principal.Claims.ToList());
 
-        return Result<TokenDto>.Success(tokenDto);
+        return Result<TokenResponse>.Success(tokenResponse);
     }
 
     public async Task<bool> RevokeRefreshToken(string email)
@@ -109,26 +109,32 @@ public class IdentityService : IIdentityService
         return Result<string>.Success(token);
     }
 
-    public async Task<Result<bool>> ConfirmEmail(string email, string token)
+    public async Task<Result> ConfirmEmail(string email, string token)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
-            return Result<bool>.Failure("There was an error while processing the request");
+            return Result.Failure("There was an error while processing the request");
 
         var confirmEmailResult = await _userManager.ConfirmEmailAsync(user, token);
 
-        return Result<bool>.Success(confirmEmailResult.Succeeded);
+        if (confirmEmailResult.Succeeded)
+            return Result.Success();
+        else
+            return Result.Failure();
     }
 
-    public async Task<Result<bool>> ResetPassword(string email, string token, string password)
+    public async Task<Result> ResetPassword(string email, string token, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
-            return Result<bool>.Failure("There was an error while processing the request");
+            return Result.Failure("There was an error while processing the request");
 
         var resetPasswordResult = await _userManager.ResetPasswordAsync(user, token, password);
 
-        return Result<bool>.Success(resetPasswordResult.Succeeded);
+        if (resetPasswordResult.Succeeded)
+            return Result.Success();
+        else
+            return Result.Failure();
     }
 
     public async Task<Result<string>> ExternalLogin()
@@ -180,24 +186,24 @@ public class IdentityService : IIdentityService
         return Result<string>.Failure("Error while trying to login");
     }
 
-    public async Task<TokenDto> GetExternalLoginTokens(string email, string provider)
+    public async Task<TokenResponse> GetExternalLoginTokens(string email, string provider)
     {
-        var tokenDto = new TokenDto();
+        var tokenResponse = new TokenResponse();
 
         if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(provider))
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                tokenDto.AccessToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "AccessToken");
-                tokenDto.RefreshToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "RefreshToken");
+                tokenResponse.AccessToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "AccessToken");
+                tokenResponse.RefreshToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "RefreshToken");
 
                 await _userManager.RemoveAuthenticationTokenAsync(user, provider, "AccessToken");
                 await _userManager.RemoveAuthenticationTokenAsync(user, provider, "RefreshToken");
             }
         }
 
-        return tokenDto;
+        return tokenResponse;
     }
 
     private static List<Claim> GetUserClaims(User user)
@@ -213,7 +219,7 @@ public class IdentityService : IIdentityService
         return claims;
     }
 
-    private async Task<TokenDto> GetTokensForUser(User user, List<Claim> claims)
+    private async Task<TokenResponse> GetTokensForUser(User user, List<Claim> claims)
     {
         var accessToken = GenerateAccessToken(claims);
         var refreshToken = GenerateRefreshToken();
@@ -225,7 +231,7 @@ public class IdentityService : IIdentityService
 
         await _userManager.UpdateAsync(user);
 
-        return new TokenDto()
+        return new TokenResponse()
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken

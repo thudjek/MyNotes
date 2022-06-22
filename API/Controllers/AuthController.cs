@@ -1,6 +1,8 @@
-﻿using Application.Features.Auth.Commands;
+﻿using Application.Common;
+using Application.Features.Auth.Commands;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using SharedModels.Requests.Auth;
 
 namespace API.Controllers;
 
@@ -14,19 +16,21 @@ public class AuthController : ApiBaseController
 
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
-        var registerResultDto = await Mediator.Send(command);
-        if (registerResultDto.Success)
+        var command = Mapper.MapTo<RegisterCommand>(request);
+        var result = await Mediator.Send(command);
+        if (result.IsSuccess)
             return Ok();
 
-        return Conflict(new { registerResultDto.Error });
+        return Conflict(new { result.Error });
     }
 
     [HttpPost]
     [Route("login")]
-    public async Task<IActionResult> Login([FromBody] LoginCommand command)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
+        var command = Mapper.MapTo<LoginCommand>(request);
         var result = await Mediator.Send(command);
         if (result.IsSuccess)
             return Ok(result.Value);
@@ -36,8 +40,9 @@ public class AuthController : ApiBaseController
 
     [HttpPost]
     [Route("refresh-token")]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
+        var command = Mapper.MapTo<RefreshTokenCommand>(request);
         var result = await Mediator.Send(command);
         if (result.IsSuccess)
             return Ok(result.Value);
@@ -47,8 +52,9 @@ public class AuthController : ApiBaseController
 
     [HttpPost]
     [Route("revoke-refresh-token")]
-    public async Task<IActionResult> RevokeRefreshToken([FromBody] RevokeRefreshTokenCommand command)
+    public async Task<IActionResult> RevokeRefreshToken([FromBody] RevokeRefreshTokenRequest request)
     {
+        var command = Mapper.MapTo<RevokeRefreshTokenCommand>(request);
         if (await Mediator.Send(command))
             return NoContent();
 
@@ -57,10 +63,10 @@ public class AuthController : ApiBaseController
 
     [HttpPost]
     [Route("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailCommand command)
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
+        var command = Mapper.MapTo<ConfirmEmailCommand>(request);
         var result = await Mediator.Send(command);
-
         if (result.IsSuccess)
             return Ok();
 
@@ -69,18 +75,19 @@ public class AuthController : ApiBaseController
 
     [HttpPost]
     [Route("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
+        var command = Mapper.MapTo<ForgotPasswordCommand>(request);
         await Mediator.Send(command);
         return Ok();
     }
 
     [HttpPost]
     [Route("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
+        var command = Mapper.MapTo<ResetPasswordCommand>(request);
         var result = await Mediator.Send(command);
-
         if (result.IsSuccess)
             return Ok();
 
@@ -102,7 +109,6 @@ public class AuthController : ApiBaseController
     {
         var command = new ExternalLoginCommand();
         var result = await Mediator.Send(command);
-
         if (!result.IsSuccess)
             return BadRequest(new { result.Error });
 
@@ -111,9 +117,10 @@ public class AuthController : ApiBaseController
 
     [HttpPost]
     [Route("external-login-tokens")]
-    public async Task<IActionResult> ExternalLoginTokens([FromBody] ExternalLoginTokensCommand command)
+    public async Task<IActionResult> ExternalLoginTokens([FromBody] ExternalLoginTokensRequest request)
     {
-        var tokenDto = await Mediator.Send(command);
-        return Ok(tokenDto);
+        var command = Mapper.MapTo<ExternalLoginTokensCommand>(request);
+        var tokenResponse = await Mediator.Send(command);
+        return Ok(tokenResponse);
     }
 }

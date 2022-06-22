@@ -1,19 +1,17 @@
-﻿using Application.Common.Exceptions;
+﻿using Application.Common;
 using Application.Common.Interfaces;
-using Application.Dtos.Auth;
 using Application.Enums;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Auth.Commands;
-public class RegisterCommand : IRequest<RegisterResultDto>
+public class RegisterCommand : IRequest<Result>
 {
     public string Email { get; set; }
     public string Password { get; set; }
     public string ConfirmPassword { get; set; }
 }
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterResultDto>
+public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result>
 {
     private readonly IIdentityService _identityService;
     private readonly IEmailService _emailService;
@@ -23,15 +21,15 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
         _emailService = emailService;
     }
 
-    public async Task<RegisterResultDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
-        var registerResultDto = await _identityService.Register(request.Email, request.Password);
+        var result = await _identityService.Register(request.Email, request.Password);
 
         var tokenResult = await _identityService.GetTokenForIdentityPurpose(request.Email, TokenPurpose.ConfirmEmail);
 
         if (tokenResult.IsSuccess)
             await _emailService.SendConfirmationEmail(request.Email, tokenResult.Value);
 
-        return registerResultDto;
+        return result;
     }
 }

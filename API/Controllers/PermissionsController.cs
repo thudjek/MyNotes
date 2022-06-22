@@ -1,6 +1,8 @@
-﻿using Application.Features.Permissions.Commands;
+﻿using Application.Common;
+using Application.Features.Permissions.Commands;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedModels.Requests.Permissions;
 
 namespace API.Controllers;
 
@@ -9,8 +11,9 @@ public class PermissionsController : ApiBaseController
 {
     [HttpPost]
     [Route("give")]
-    public async Task<IActionResult> Give([FromBody] GivePermissionsCommand command)
+    public async Task<IActionResult> Give([FromBody] GivePermissionsRequest request)
     {
+        var command = Mapper.MapTo<GivePermissionsCommand>(request);
         await Mediator.Send(command);
         return Ok();
     }

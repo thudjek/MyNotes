@@ -1,16 +1,15 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Dtos.Permissions;
 using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using SharedModels.Requests.Permissions;
 
 namespace Application.Features.Permissions.Commands;
 public class GivePermissionsCommand : IRequest
 {
     public int NoteId { get; set; }
-    public List<GivePermissionsDto> Permissions { get; set; }
-
+    public List<PermissionToGive> Permissions { get; set; }
 }
 
 public class GivePermissionsCommandHandler : IRequestHandler<GivePermissionsCommand>
@@ -41,14 +40,14 @@ public class GivePermissionsCommandHandler : IRequestHandler<GivePermissionsComm
 
             if (permission != null)
             {
-                permission.Scope = p.Scope;
+                permission.Scope = (int)p.Scope;
             }
             else
             {
                 note.Permissions.Add(new Permission()
                 {
                     Email = p.Email,
-                    Scope = p.Scope
+                    Scope = (int)p.Scope
                 });
             }
         });

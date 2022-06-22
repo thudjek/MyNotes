@@ -1,6 +1,5 @@
 ﻿using Application.Common;
 using Application.Common.Interfaces;
-using Application.Dtos.Auth;
 using MediatR;
 
 namespace Application.Features.Auth.Commands;

@@ -1,16 +1,16 @@
 ﻿using Application.Common.Interfaces;
-using Application.Dtos.Notes;
-using Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using SharedModels.Enums;
+using SharedModels.Responses.Notes;
 
 namespace Application.Features.Notes.Queries;
-public class GetNoteQuery : IRequest<NoteDto>
+public class GetNoteQuery : IRequest<NoteResponse>
 {
     public int Id { get; set; }
 }
 
-public class GetNoteQueryHandler : IRequestHandler<GetNoteQuery, NoteDto>
+public class GetNoteQueryHandler : IRequestHandler<GetNoteQuery, NoteResponse>
 {
     private readonly IAppDbContext _dbContext;
     private readonly ICurrentUserService _currentUserService;
@@ -20,20 +20,20 @@ public class GetNoteQueryHandler : IRequestHandler<GetNoteQuery, NoteDto>
         _currentUserService = currentUserService;
     }
 
-    public async Task<NoteDto> Handle(GetNoteQuery request, CancellationToken cancellationToken)
+    public async Task<NoteResponse> Handle(GetNoteQuery request, CancellationToken cancellationToken)
     {
-        NoteDto noteDto = null;
+        NoteResponse noteResponse = null;
 
         var note = await _dbContext.Notes
             .Include(n => n.Permissions)
             .Where(n => n.Id == request.Id && (
                         n.CreatedBy == _currentUserService.UserId || 
-                        n.Permissions.Any(p => p.Email == _currentUserService.Email && (p.Scope == PermissionScope.Read || p.Scope == PermissionScope.ReadAndWrite))))
+                        n.Permissions.Any(p => p.Email == _currentUserService.Email && (p.Scope == (int)PermissionScope.Read || p.Scope == (int)PermissionScope.ReadAndWrite))))
             .FirstOrDefaultAsync(n => n.Id == request.Id, cancellationToken);
 
         if (note != null)
         {
-            noteDto = new NoteDto()
+            noteResponse = new NoteResponse()
             {
                 Id = note.Id,
                 Title = note.Title,
@@ -42,6 +42,6 @@ public class GetNoteQueryHandler : IRequestHandler<GetNoteQuery, NoteDto>
             };
         }
 
-        return noteDto;
+        return noteResponse;
     }
 }

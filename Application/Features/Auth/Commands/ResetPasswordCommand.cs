@@ -3,7 +3,7 @@ using Application.Common.Interfaces;
 using MediatR;
 
 namespace Application.Features.Auth.Commands;
-public class ResetPasswordCommand : IRequest<Result<bool>>
+public class ResetPasswordCommand : IRequest<Result>
 {
     public string Password { get; set; }
     public string ConfirmPassword { get; set; }
@@ -11,7 +11,7 @@ public class ResetPasswordCommand : IRequest<Result<bool>>
     public string Token { get; set; }
 }
 
-public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, Result<bool>>
+public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, Result>
 {
     private readonly IIdentityService _identityService;
     public ResetPasswordCommandHandler(IIdentityService identityService)
@@ -19,7 +19,7 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand,
         _identityService = identityService;
     }
 
-    public async Task<Result<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
         return await _identityService.ResetPassword(request.Email, request.Token, request.Password);
     }

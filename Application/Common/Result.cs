@@ -1,29 +1,63 @@
 ﻿namespace Application.Common;
-public class Result<T>
+
+public class Result
 {
-    public Result(T value)
+    public Result(bool isSuccess, string message)
     {
-        IsSuccess = true;
+        IsSuccess = isSuccess;
+        if(IsSuccess)
+            SuccessMessage = message;
+        else
+            Error = message;
+    }
+
+    public Result(bool isSuccess)
+    {
+        IsSuccess = isSuccess;
+    }
+
+    public bool IsSuccess { get; protected set; }
+    public string SuccessMessage { get; protected set; }
+    public string Error { get; protected set; }
+
+    public static Result Success()
+    {
+        return new Result(true);
+    }
+
+    public static Result Success(string message)
+    {
+        return new Result(true, message);
+    }
+
+    public static Result Failure()
+    {
+        return new Result(false);
+    }
+
+    public static Result Failure(string message)
+    {
+        return new Result(false, message);
+    }
+}
+
+public class Result<T> : Result where T : class
+{
+    public Result(T value) : base(true)
+    {
         Value = value;
     }
 
-    public Result(T value, string successMessage)
+    public Result(T value, string successMessage) : base(true, successMessage)
     {
-        IsSuccess = true;
         Value = value;
-        SuccessMessage = successMessage;
     }
 
-    public Result(string error)
+    public Result(string error) : base(false, error)
     {
-        IsSuccess = false;
-        Error = error;
     }
 
     public T Value { get; private set; }
-    public bool IsSuccess { get; private set; }
-    public string SuccessMessage { get; private set; }
-    public string Error { get; private set; }
 
     public static Result<T> Success(T value)
     {
@@ -35,12 +69,12 @@ public class Result<T>
         return new Result<T>(value, successMessage);
     }
 
-    public static Result<T> Failure(string error)
+    public new static Result<T> Failure(string error)
     {
         return new Result<T>(error);
     }
 
-    public static Result<T> Failure()
+    public new static Result<T> Failure()
     {
         return new Result<T>(string.Empty);
     }
