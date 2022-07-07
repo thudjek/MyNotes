@@ -27,7 +27,7 @@ public class MediatRClass1Handler : IRequestHandler<DeleteNoteCommand>
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
-            throw new NotFoundException(nameof(Note), request.Id, _currentUserService.UserId);
+            throw new NotFoundException(nameof(Note), request.Id, _currentUserService.UserId, "Error has occurred with selected note");
 
         _dbContext.Notes.Remove(note);
 

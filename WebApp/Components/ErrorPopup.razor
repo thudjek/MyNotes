@@ -1,0 +1,30 @@
+﻿@inject ErrorPopupService _errorPopupService;
+
+<div class="error-popup @cssClasses">
+    <p>@message</p>
+</div>
+
+@code {
+    private string message;
+    private string cssClasses;
+
+    protected override void OnInitialized()
+    {
+        cssClasses = "d-none";
+        _errorPopupService.OnShow += ShowErrorPopup;
+        _errorPopupService.OnHide += HideErrorPopup;
+    }
+
+    private void ShowErrorPopup(string message)
+    {
+        this.message = message;
+        cssClasses = "d-flex fade-in";
+        StateHasChanged();
+    }
+
+    private void HideErrorPopup()
+    {
+        cssClasses = "d-flex fade-out";
+        StateHasChanged();
+    }
+}

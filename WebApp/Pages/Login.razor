@@ -1,0 +1,87 @@
+﻿@page "/login"
+@layout NotAuthorizedLayout
+@using SharedModels.Requests.Auth
+@using SharedModels.Responses.Auth
+@inject IHttpClientFactory _httpClientFactory
+@inject ErrorPopupService _errorPopupService;
+
+<EditForm Model="@loginRequest" OnSubmit="SubmitLogin">
+    <CustomValidator @ref="customValidator" />
+    <div class="row">
+        <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3 text-start">
+            <InputText class="form-control input" placeholder="Email" @bind-Value=loginRequest.Email />
+            <ValidationMessage For="() => loginRequest.Email" />
+        </div>
+    </div>
+    <div class="row">
+            <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3 text-start">
+            <InputText class="form-control input" placeholder="Password" type="password" @bind-Value=loginRequest.Password />
+            <ValidationMessage For="() => loginRequest.Password" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+            <button class="btn btn-primary w-100" type="submit">Log in</button>
+        </div>
+    </div>
+</EditForm>
+<div class="row">
+    <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3 text-center">
+        <a class="link" href=#>Forgot your password?</a>
+    </div>
+    <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+        <div class="separator">Or</div>
+    </div>
+    <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+        <button class='btn google-login-btn'>
+            <img src='https://developers.google.com/identity/images/g-logo.png'>
+            <span>Log in with Google</span>
+        </button>
+    </div>
+    <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+        <br />
+        <p>Don't have an account? <a class="link" href="sign-up">Sign up</a></p>
+    </div>
+</div>
+
+@if (tokens != null)
+{
+    <h4>@tokens.AccessToken</h4>
+    <h4>@tokens.RefreshToken</h4>
+}
+
+@code {
+    private LoginRequest loginRequest = new ();
+    private HttpClient httpClient = null;
+    CustomValidator customValidator;
+    private List<string> validationErrors = new();
+    private TokenResponse tokens = null;
+
+    protected override void OnInitialized()
+    {
+        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
+    }
+
+    private async Task SubmitLogin()
+    {
+        var httpResponse = await httpClient.PostAsJsonAsync("auth/login", loginRequest);
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
+            tokens = tokenResponse;
+        }
+        else
+        {
+            var errorModel = await httpResponse.Content.ReadFromJsonAsync<ErrorModel>();
+            if (errorModel.Errors != null)
+            {
+                customValidator.ClearErrors();
+                customValidator.DisplayErrors(errorModel.ErrorsGrouped);
+            }
+            else
+            {
+                _errorPopupService.ShowErrorPopup(errorModel.Error);
+            }
+        }
+    }
+}

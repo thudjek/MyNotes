@@ -23,7 +23,7 @@ public class AuthController : ApiBaseController
         if (result.IsSuccess)
             return Ok();
 
-        return Conflict(new { result.Error });
+        return Conflict(result.ToErrorModel());
     }
 
     [HttpPost]
@@ -35,7 +35,7 @@ public class AuthController : ApiBaseController
         if (result.IsSuccess)
             return Ok(result.Value);
 
-        return Unauthorized(new { result.Error });
+        return Unauthorized(result.ToErrorModel());
     }
 
     [HttpPost]
@@ -47,7 +47,7 @@ public class AuthController : ApiBaseController
         if (result.IsSuccess)
             return Ok(result.Value);
 
-        return Unauthorized(new { result.Error });
+        return Unauthorized(result.ToErrorModel());
     }
 
     [HttpPost]
@@ -70,7 +70,7 @@ public class AuthController : ApiBaseController
         if (result.IsSuccess)
             return Ok();
 
-        return BadRequest(new { result.Error });
+        return BadRequest(result.ToErrorModel());
     }
 
     [HttpPost]
@@ -91,7 +91,7 @@ public class AuthController : ApiBaseController
         if (result.IsSuccess)
             return Ok();
 
-        return BadRequest(new { result.Error });
+        return BadRequest(result.ToErrorModel());
     }
 
     [HttpGet]
@@ -110,7 +110,7 @@ public class AuthController : ApiBaseController
         var command = new ExternalLoginCommand();
         var result = await Mediator.Send(command);
         if (!result.IsSuccess)
-            return BadRequest(new { result.Error });
+            return BadRequest(result.ToErrorModel());
 
         return Redirect($"{_configuration["App:ExternalLoginReturnUrl"]}{result.Value}"); //redirect to FE
     }

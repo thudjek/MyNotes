@@ -1,4 +1,6 @@
-﻿namespace Application.Common;
+﻿using SharedModels;
+
+namespace Application.Common;
 
 public class Result
 {
@@ -38,6 +40,11 @@ public class Result
     public static Result Failure(string message)
     {
         return new Result(false, message);
+    }
+
+    public ErrorModel ToErrorModel()
+    {
+        return new ErrorModel(Error);
     }
 }
 

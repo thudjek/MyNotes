@@ -1,6 +1,6 @@
-﻿using API.Models;
-using Application.Common.Exceptions;
+﻿using Application.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
+using SharedModels;
 
 namespace API.Extensions;
 
@@ -20,13 +20,15 @@ public static class WebApplicationExtensions
                 switch (exceptionHandlerPathFeature?.Error)
                 {
                     case ValidationException ex:
-                        errorModel.Message = ex.Message;
+                        errorModel.Error = ex.Message;
                         errorModel.Errors = ex.Errors;
+                        errorModel.ErrorsGrouped = ex.ErrorsGrouped;
                         context.Response.StatusCode = 400;
                         await context.Response.WriteAsync(errorModel.ToJson());
                         break;
                     case NotFoundException ex:
-                        errorModel.Message = ex.Message;
+                        if (!string.IsNullOrWhiteSpace(ex.UserMessage))
+                            errorModel.Error = ex.UserMessage;
                         context.Response.StatusCode = 404;
                         await context.Response.WriteAsync(errorModel.ToJson());
                         break;

@@ -32,7 +32,7 @@ public class GivePermissionsCommandHandler : IRequestHandler<GivePermissionsComm
                     .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null)
-            throw new NotFoundException(nameof(Note), request.NoteId, _currentUserService.UserId);
+            throw new NotFoundException(nameof(Note), request.NoteId, _currentUserService.UserId, "Error has occurred with selected note");
 
         request.Permissions.ForEach(p =>
         {

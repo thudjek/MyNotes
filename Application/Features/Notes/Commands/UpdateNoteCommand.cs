@@ -29,7 +29,7 @@ public class UpdateNoteCommandHandler : IRequestHandler<UpdateNoteCommand>
             .FirstOrDefaultAsync(cancellationToken);
 
         if (note == null || note.CreatedBy != _currentUserService.UserId)
-            throw new NotFoundException(nameof(Note), request.Id, _currentUserService.UserId);
+            throw new NotFoundException(nameof(Note), request.Id, _currentUserService.UserId, "Error has occurred with selected note");
 
         note.Title = request.Title;
         note.Content = request.Content;

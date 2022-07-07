@@ -27,7 +27,7 @@ public class RevokePermissionCommandHandler : IRequestHandler<RevokePermissionCo
             .FirstOrDefaultAsync(cancellationToken);
 
         if (permission == null)
-            throw new NotFoundException(nameof(Permission), request.Id, _currentUserService.UserId);
+            throw new NotFoundException(nameof(Permission), request.Id, _currentUserService.UserId, "You cannot revoke permission you didn't give");
 
         _appDbContext.Permissions.Remove(permission);
 

@@ -1,0 +1,40 @@
+﻿@page "/sign-up"
+@layout NotAuthorizedLayout
+@using SharedModels.Requests.Auth
+
+<EditForm Model="@registerRequest">
+    <div class="row">
+        <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+            <InputText class="form-control input" placeholder="Email" @bind-Value=registerRequest.Email />
+        </div>
+    </div>
+    <div class="row">
+            <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+            <InputText class="form-control input" placeholder="Password" type="password" @bind-Value=registerRequest.Password />
+        </div>
+    </div>
+    <div class="row">
+            <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+            <InputText class="form-control input" placeholder="Confirm password" type="password" @bind-Value=registerRequest.ConfirmPassword />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+            <button class="btn btn-primary w-100" type="submit">Sign up</button>
+        </div>
+    </div>
+</EditForm>
+<div class="row">
+    <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+        <br />
+        <p>By signing up you agree to our <a class="link" href="terms">Terms of Service</a></p>
+    </div>
+    <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
+        <p>Already have an account? <a class="link" href="login">Log in</a></p>
+    </div>
+</div>
+
+
+@code {
+    private RegisterRequest registerRequest = new ();
+}

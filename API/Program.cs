@@ -9,6 +9,8 @@ using API.Extensions;
 using Application.Common.Interfaces;
 using API.Services;
 using Infrastructure.Data;
+using CookieSameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
+using Microsoft.Net.Http.Headers;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -85,7 +87,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
     services.Configure<CookiePolicyOptions>(options => 
     {
         options.CheckConsentNeeded = context => true;
-        options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+        options.MinimumSameSitePolicy = CookieSameSiteMode.Unspecified;
     });
 }
 
@@ -109,12 +111,16 @@ static async Task ConfigureMiddleware(WebApplication app, IServiceProvider servi
 
         app.Use((context, next) => 
         {
-            context.Request.Host = new HostString(app.Configuration["AppDomain"]);
+            context.Request.Host = new HostString(app.Configuration["App:ApiDomain"]);
             context.Request.Scheme = "https";
             return next();
         });
     }
 
+    app.UseCors(policy => 
+        policy.WithOrigins(app.Configuration["App:WebAppBaseUrl"])
+        .AllowAnyMethod()
+        .WithHeaders(HeaderNames.ContentType));
 
     app.UseSerilogRequestLogging();
 
