@@ -6,6 +6,7 @@ public class ResetPasswordValidator : AbstractValidator<ResetPasswordCommand>
     public ResetPasswordValidator()
     {
         RuleFor(x => x.Password)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Password is required")
             .MinimumLength(8).WithMessage("Password must have at least 8 characters")
             .Matches("[A-Z]").WithMessage("Password must have at least one uppercase letter")
@@ -13,6 +14,7 @@ public class ResetPasswordValidator : AbstractValidator<ResetPasswordCommand>
             .Matches("[0-9]").WithMessage("Password must have at least one number");
 
         RuleFor(x => x.ConfirmPassword)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("You must confirm password")
             .Equal(x => x.Password).WithMessage("Passwords do not match");
     }

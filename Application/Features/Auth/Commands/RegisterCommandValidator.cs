@@ -11,6 +11,7 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .EmailAddress().WithMessage("Email is not in correct format");
 
         RuleFor(x => x.Password)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Password is required")
             .MinimumLength(8).WithMessage("Password must have at least 8 characters")
             .Matches("[A-Z]").WithMessage("Password must have at least one uppercase letter")
@@ -18,6 +19,7 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .Matches("[0-9]").WithMessage("Password must have at least one number");
 
         RuleFor(x => x.ConfirmPassword)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("You must confirm password")
             .Equal(x => x.Password).WithMessage("Passwords do not match");
     }

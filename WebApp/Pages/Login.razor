@@ -44,18 +44,10 @@
     </div>
 </div>
 
-@if (tokens != null)
-{
-    <h4>@tokens.AccessToken</h4>
-    <h4>@tokens.RefreshToken</h4>
-}
-
 @code {
     private LoginRequest loginRequest = new ();
     private HttpClient httpClient = null;
     CustomValidator customValidator;
-    private List<string> validationErrors = new();
-    private TokenResponse tokens = null;
 
     protected override void OnInitialized()
     {
@@ -68,7 +60,7 @@
         if (httpResponse.IsSuccessStatusCode)
         {
             var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
-            tokens = tokenResponse;
+            //save tokens
         }
         else
         {
