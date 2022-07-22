@@ -1,15 +1,15 @@
 ﻿using Application.Common.Interfaces;
+using Application.Dtos.Auth;
 using MediatR;
-using SharedModels.Responses.Auth;
 
 namespace Application.Features.Auth.Commands;
-public class ExternalLoginTokensCommand : IRequest<TokenResponse>
+public class ExternalLoginTokensCommand : IRequest<TokensDto>
 {
     public string Email { get; set; }
     public string Provider { get; set; }
 }
 
-public class ExternalLoginTokensCommandHandler : IRequestHandler<ExternalLoginTokensCommand, TokenResponse>
+public class ExternalLoginTokensCommandHandler : IRequestHandler<ExternalLoginTokensCommand, TokensDto>
 {
     private readonly IIdentityService _identityService;
     public ExternalLoginTokensCommandHandler(IIdentityService identityService)
@@ -17,7 +17,7 @@ public class ExternalLoginTokensCommandHandler : IRequestHandler<ExternalLoginTo
         _identityService = identityService;
     }
 
-    public async Task<TokenResponse> Handle(ExternalLoginTokensCommand request, CancellationToken cancellationToken)
+    public async Task<TokensDto> Handle(ExternalLoginTokensCommand request, CancellationToken cancellationToken)
     {
         return await _identityService.GetExternalLoginTokens(request.Email, request.Provider);
     }

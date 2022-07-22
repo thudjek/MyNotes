@@ -1,16 +1,16 @@
 ﻿using Application.Common;
 using Application.Common.Interfaces;
+using Application.Dtos.Auth;
 using MediatR;
-using SharedModels.Responses.Auth;
 
 namespace Application.Features.Auth.Commands;
-public class RefreshTokenCommand : IRequest<Result<TokenResponse>>
+public class RefreshTokenCommand : IRequest<Result<TokensDto>>
 {
     public string AccessToken { get; set; }
     public string RefreshToken { get; set; }
 }
 
-public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, Result<TokenResponse>>
+public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, Result<TokensDto>>
 {
     private readonly IIdentityService _identityService;
     public RefreshTokenCommandHandler(IIdentityService identityService)
@@ -18,7 +18,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
         _identityService = identityService;
     }
 
-    public Task<Result<TokenResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    public Task<Result<TokensDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         return _identityService.RefreshToken(request.AccessToken, request.RefreshToken);
     }

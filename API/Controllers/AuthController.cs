@@ -1,4 +1,5 @@
-﻿using Application.Common;
+﻿using API.Extensions;
+using Application.Common;
 using Application.Features.Auth.Commands;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,10 @@ public class AuthController : ApiBaseController
         var command = Mapper.MapTo<LoginCommand>(request);
         var result = await Mediator.Send(command);
         if (result.IsSuccess)
-            return Ok(result.Value);
+        {
+            HttpContext.AddCookieToResponse("refreshToken", result.Value.RefreshToken, true);
+            return Ok(new { result.Value.AccessToken });
+        }
 
         return Unauthorized(result.ToErrorModel());
     }
@@ -45,7 +49,10 @@ public class AuthController : ApiBaseController
         var command = Mapper.MapTo<RefreshTokenCommand>(request);
         var result = await Mediator.Send(command);
         if (result.IsSuccess)
+        {
+            HttpContext.AddCookieToResponse("refreshToken", result.Value.RefreshToken, true);
             return Ok(result.Value);
+        }
 
         return Unauthorized(result.ToErrorModel());
     }
@@ -120,7 +127,8 @@ public class AuthController : ApiBaseController
     public async Task<IActionResult> ExternalLoginTokens([FromBody] ExternalLoginTokensRequest request)
     {
         var command = Mapper.MapTo<ExternalLoginTokensCommand>(request);
-        var tokenResponse = await Mediator.Send(command);
-        return Ok(tokenResponse);
+        var tokensDto = await Mediator.Send(command);
+        HttpContext.AddCookieToResponse("refreshToken", tokensDto.RefreshToken, true);
+        return Ok(new { tokensDto.AccessToken });
     }
 }

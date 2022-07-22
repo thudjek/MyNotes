@@ -1,9 +1,11 @@
 ﻿@page "/login"
 @layout NotAuthorizedLayout
+@using Blazored.LocalStorage
 @using SharedModels.Requests.Auth
 @using SharedModels.Responses.Auth
 @inject IHttpClientFactory _httpClientFactory
 @inject ErrorPopupService _errorPopupService;
+@inject ILocalStorageService _localStorage;
 
 <EditForm Model="@loginRequest" OnSubmit="SubmitLogin">
     <CustomValidator @ref="customValidator" />
@@ -60,7 +62,7 @@
         if (httpResponse.IsSuccessStatusCode)
         {
             var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
-            //save tokens
+            await _localStorage.SetItemAsync<string>("accessToken", tokenResponse.AccessToken);
         }
         else
         {

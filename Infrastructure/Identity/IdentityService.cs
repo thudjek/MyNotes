@@ -1,6 +1,7 @@
 ﻿using Application.Common;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
+using Application.Dtos.Auth;
 using Application.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -44,36 +45,36 @@ public class IdentityService : IIdentityService
         return Result.Success();
     }
 
-    public async Task<Result<TokenResponse>> Login(string email, string password)
+    public async Task<Result<TokensDto>> Login(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
-            return Result<TokenResponse>.Failure("Wrong email or password");
+            return Result<TokensDto>.Failure("Wrong email or password");
 
         if(!user.EmailConfirmed)
-            return Result<TokenResponse>.Failure("Email is not confirmed");
+            return Result<TokensDto>.Failure("Email is not confirmed");
 
         var claims = GetUserClaims(user);
-        var tokenResponse = await GetTokensForUser(user, claims);
+        var tokensDto = await GetTokensForUser(user, claims);
 
-        return Result<TokenResponse>.Success(tokenResponse);
+        return Result<TokensDto>.Success(tokensDto);
     }
 
-    public async Task<Result<TokenResponse>> RefreshToken(string accessToken, string refreshToken)
+    public async Task<Result<TokensDto>> RefreshToken(string accessToken, string refreshToken)
     {
         var principal = GetClaimsPrincipalFromAccessToken(accessToken);
         if (principal == null)
-            return Result<TokenResponse>.Failure("Invalid access token or refresh token");
+            return Result<TokensDto>.Failure("Invalid access token or refresh token");
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
         var user = await _userManager.FindByEmailAsync(email);
 
         if(user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= _dateTimeService.Now)
-            return Result<TokenResponse>.Failure("Invalid access token or refresh token");
+            return Result<TokensDto>.Failure("Invalid access token or refresh token");
 
-        var tokenResponse = await GetTokensForUser(user, principal.Claims.ToList());
+        var tokensDto = await GetTokensForUser(user, principal.Claims.ToList());
 
-        return Result<TokenResponse>.Success(tokenResponse);
+        return Result<TokensDto>.Success(tokensDto);
     }
 
     public async Task<bool> RevokeRefreshToken(string email)
@@ -186,24 +187,24 @@ public class IdentityService : IIdentityService
         return Result<string>.Failure("Error while trying to login");
     }
 
-    public async Task<TokenResponse> GetExternalLoginTokens(string email, string provider)
+    public async Task<TokensDto> GetExternalLoginTokens(string email, string provider)
     {
-        var tokenResponse = new TokenResponse();
+        var tokensDto = new TokensDto();
 
         if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(provider))
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                tokenResponse.AccessToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "AccessToken");
-                tokenResponse.RefreshToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "RefreshToken");
+                tokensDto.AccessToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "AccessToken");
+                tokensDto.RefreshToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "RefreshToken");
 
                 await _userManager.RemoveAuthenticationTokenAsync(user, provider, "AccessToken");
                 await _userManager.RemoveAuthenticationTokenAsync(user, provider, "RefreshToken");
             }
         }
 
-        return tokenResponse;
+        return tokensDto;
     }
 
     private static List<Claim> GetUserClaims(User user)
@@ -219,7 +220,7 @@ public class IdentityService : IIdentityService
         return claims;
     }
 
-    private async Task<TokenResponse> GetTokensForUser(User user, List<Claim> claims)
+    private async Task<TokensDto> GetTokensForUser(User user, List<Claim> claims)
     {
         var accessToken = GenerateAccessToken(claims);
         var refreshToken = GenerateRefreshToken();
@@ -231,7 +232,7 @@ public class IdentityService : IIdentityService
 
         await _userManager.UpdateAsync(user);
 
-        return new TokenResponse()
+        return new TokensDto()
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken
