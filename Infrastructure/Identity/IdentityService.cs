@@ -6,7 +6,6 @@ using Application.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using SharedModels.Responses.Auth;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -79,12 +78,15 @@ public class IdentityService : IIdentityService
 
     public async Task<bool> RevokeRefreshToken(string email)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-            return false;
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return false;
 
-        user.RefreshToken = null;
-        await _userManager.UpdateAsync(user);
+            user.RefreshToken = null;
+            await _userManager.UpdateAsync(user);
+        }
 
         return true;
     }
@@ -138,11 +140,11 @@ public class IdentityService : IIdentityService
             return Result.Failure();
     }
 
-    public async Task<Result<string>> ExternalLogin()
+    public async Task<Result<ExternalLoginInfoDto>> ExternalLogin()
     {
         var info = await _signInManager.GetExternalLoginInfoAsync();
         if (!info.Principal.Claims.Any())
-            return Result<string>.Failure("Error while trying to login");
+            return Result<ExternalLoginInfoDto>.Failure("Error while trying to login");
 
         var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, false);
         var email = info.Principal.FindFirstValue(ClaimTypes.Email);
@@ -154,7 +156,8 @@ public class IdentityService : IIdentityService
             var tokenDto = await GetTokensForUser(user, claims);
             await _userManager.SetAuthenticationTokenAsync(user, info.LoginProvider, "AccessToken", tokenDto.AccessToken);
             await _userManager.SetAuthenticationTokenAsync(user, info.LoginProvider, "RefreshToken", tokenDto.RefreshToken);
-            return Result<string>.Success(user.Email);
+
+            return Result<ExternalLoginInfoDto>.Success(new ExternalLoginInfoDto() { Email = user.Email, Provider = info.LoginProvider });
         }
 
         if (!string.IsNullOrWhiteSpace(email))
@@ -180,11 +183,13 @@ public class IdentityService : IIdentityService
             await _signInManager.SignInAsync(user, false);
 
             var tokenDto = await GetTokensForUser(user, claims);
+            await _userManager.SetAuthenticationTokenAsync(user, info.LoginProvider, "AccessToken", tokenDto.AccessToken);
+            await _userManager.SetAuthenticationTokenAsync(user, info.LoginProvider, "RefreshToken", tokenDto.RefreshToken);
 
-            return Result<string>.Success(user.Email);
+            return Result<ExternalLoginInfoDto>.Success(new ExternalLoginInfoDto() { Email = user.Email, Provider = info.LoginProvider });
         }
 
-        return Result<string>.Failure("Error while trying to login");
+        return Result<ExternalLoginInfoDto>.Failure("Error while trying to login");
     }
 
     public async Task<TokensDto> GetExternalLoginTokens(string email, string provider)
@@ -196,11 +201,16 @@ public class IdentityService : IIdentityService
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                tokensDto.AccessToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "AccessToken");
-                tokensDto.RefreshToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "RefreshToken");
+                var accessToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "AccessToken");
+                var refreshToken = await _userManager.GetAuthenticationTokenAsync(user, provider, "RefreshToken");
 
-                await _userManager.RemoveAuthenticationTokenAsync(user, provider, "AccessToken");
-                await _userManager.RemoveAuthenticationTokenAsync(user, provider, "RefreshToken");
+                if (!string.IsNullOrWhiteSpace(accessToken) && !string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    tokensDto.AccessToken = accessToken;
+                    tokensDto.RefreshToken = refreshToken;
+                    await _userManager.RemoveAuthenticationTokenAsync(user, provider, "AccessToken");
+                    await _userManager.RemoveAuthenticationTokenAsync(user, provider, "RefreshToken");
+                }
             }
         }
 

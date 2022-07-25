@@ -4,19 +4,20 @@ using MediatR;
 namespace Application.Features.Auth.Commands;
 public class RevokeRefreshTokenCommand : IRequest<bool>
 {
-    public string Email { get; set; }
 }
 
 public class RevokeRefreshTokenHandler : IRequestHandler<RevokeRefreshTokenCommand, bool>
 {
     private readonly IIdentityService _identityService;
-    public RevokeRefreshTokenHandler(IIdentityService identityService)
+    private readonly ICurrentUserService _currentUserService;
+    public RevokeRefreshTokenHandler(IIdentityService identityService, ICurrentUserService currentUserService)
     {
         _identityService = identityService;
+        _currentUserService = currentUserService;
     }
 
     public async Task<bool> Handle(RevokeRefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        return await _identityService.RevokeRefreshToken(request.Email);
+        return await _identityService.RevokeRefreshToken(_currentUserService.Email);
     }
 }

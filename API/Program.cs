@@ -117,10 +117,12 @@ static async Task ConfigureMiddleware(WebApplication app, IServiceProvider servi
         });
     }
 
-    app.UseCors(policy => 
+    app.UseCors(policy =>
         policy.WithOrigins(app.Configuration["App:WebAppBaseUrl"])
         .AllowAnyMethod()
-        .WithHeaders(HeaderNames.ContentType));
+        .AllowAnyHeader()
+        .AllowCredentials());
+        
 
     app.UseSerilogRequestLogging();
 

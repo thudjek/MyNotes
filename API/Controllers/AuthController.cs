@@ -35,6 +35,7 @@ public class AuthController : ApiBaseController
         var result = await Mediator.Send(command);
         if (result.IsSuccess)
         {
+            HttpContext.Response.Cookies.Delete("refreshToken");
             HttpContext.AddCookieToResponse("refreshToken", result.Value.RefreshToken, true);
             return Ok(new { result.Value.AccessToken });
         }
@@ -47,9 +48,11 @@ public class AuthController : ApiBaseController
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         var command = Mapper.MapTo<RefreshTokenCommand>(request);
+        command.RefreshToken = HttpContext.GetValueFromCookie("refreshToken");
         var result = await Mediator.Send(command);
         if (result.IsSuccess)
         {
+            HttpContext.Response.Cookies.Delete("refreshToken");
             HttpContext.AddCookieToResponse("refreshToken", result.Value.RefreshToken, true);
             return Ok(result.Value);
         }
@@ -59,11 +62,13 @@ public class AuthController : ApiBaseController
 
     [HttpPost]
     [Route("revoke-refresh-token")]
-    public async Task<IActionResult> RevokeRefreshToken([FromBody] RevokeRefreshTokenRequest request)
+    public async Task<IActionResult> RevokeRefreshToken()
     {
-        var command = Mapper.MapTo<RevokeRefreshTokenCommand>(request);
-        if (await Mediator.Send(command))
+        if (await Mediator.Send(new RevokeRefreshTokenCommand()))
+        {
+            HttpContext.Response.Cookies.Delete("refreshToken");
             return NoContent();
+        }
 
         return BadRequest();
     }
@@ -103,7 +108,7 @@ public class AuthController : ApiBaseController
 
     [HttpGet]
     [Route("external-login/{provider}")]
-    public IActionResult GoogleLogin([FromRoute] string provider)
+    public IActionResult ExternalLogin([FromRoute] string provider)
     {
         var properties = new AuthenticationProperties() { RedirectUri = Url.Action("ExternalLoginCallback"), AllowRefresh = true };
         properties.Items["LoginProvider"] = provider;
@@ -119,7 +124,7 @@ public class AuthController : ApiBaseController
         if (!result.IsSuccess)
             return BadRequest(result.ToErrorModel());
 
-        return Redirect($"{_configuration["App:ExternalLoginReturnUrl"]}{result.Value}"); //redirect to FE
+        return Redirect($"{_configuration["App:ExternalLoginReturnUrl"]}?email={result.Value.Email}&provider={result.Value.Provider}");
     }
 
     [HttpPost]
@@ -128,7 +133,9 @@ public class AuthController : ApiBaseController
     {
         var command = Mapper.MapTo<ExternalLoginTokensCommand>(request);
         var tokensDto = await Mediator.Send(command);
-        HttpContext.AddCookieToResponse("refreshToken", tokensDto.RefreshToken, true);
+        if(!string.IsNullOrWhiteSpace(tokensDto.RefreshToken))
+            HttpContext.AddCookieToResponse("refreshToken", tokensDto.RefreshToken, true);
+
         return Ok(new { tokensDto.AccessToken });
     }
 }

@@ -21,8 +21,8 @@ public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand, int>
     {
         var note = new Note()
         {
-            Title = request.Title,
-            Content = request.Content
+            Title = request.Title ?? string.Empty,
+            Content = request.Content ?? string.Empty
         };
 
         _dbContext.Notes.Add(note);

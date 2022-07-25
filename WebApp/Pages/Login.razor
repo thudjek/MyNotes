@@ -1,11 +1,12 @@
 ﻿@page "/login"
 @layout NotAuthorizedLayout
-@using Blazored.LocalStorage
 @using SharedModels.Requests.Auth
 @using SharedModels.Responses.Auth
 @inject IHttpClientFactory _httpClientFactory
-@inject ErrorPopupService _errorPopupService;
-@inject ILocalStorageService _localStorage;
+@inject ErrorPopupService _errorPopupService
+@inject ILocalStorageService _localStorage
+@inject AuthenticationStateProvider _authStateProvider
+@inject NavigationManager _navigationManager
 
 <EditForm Model="@loginRequest" OnSubmit="SubmitLogin">
     <CustomValidator @ref="customValidator" />
@@ -35,7 +36,7 @@
         <div class="separator">Or</div>
     </div>
     <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
-        <button class='btn google-login-btn'>
+        <button class='btn google-login-btn' @onclick='() => ExternalLogin("Google")'>
             <img src='https://developers.google.com/identity/images/g-logo.png'>
             <span>Log in with Google</span>
         </button>
@@ -45,7 +46,6 @@
         <p>Don't have an account? <a class="link" href="sign-up">Sign up</a></p>
     </div>
 </div>
-
 @code {
     private LoginRequest loginRequest = new ();
     private HttpClient httpClient = null;
@@ -62,7 +62,9 @@
         if (httpResponse.IsSuccessStatusCode)
         {
             var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
-            await _localStorage.SetItemAsync<string>("accessToken", tokenResponse.AccessToken);
+            await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
+            ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
+            _navigationManager.NavigateTo("/");
         }
         else
         {
@@ -77,5 +79,10 @@
                 _errorPopupService.ShowErrorPopup(errorModel.Error);
             }
         }
+    }
+
+    private void ExternalLogin(string provider)
+    {
+        _navigationManager.NavigateTo($"{httpClient.BaseAddress}auth/external-login/{provider}");
     }
 }

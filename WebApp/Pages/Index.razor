@@ -1,4 +1,52 @@
 ﻿@page "/"
+@using SharedModels.Responses.Notes
 @attribute [Authorize]
+@inject IHttpClientFactory _httpClientFactory
+@inject ErrorPopupService _errorPopupService
+@inject ILocalStorageService _localStorage
+@inject RefreshTokenService _refreshTokenService
 
 <h1>Index page</h1>
+
+@if (notes == null)
+{
+    <h3>You have no notes</h3>
+}
+else
+{
+    <ul>
+        @foreach(var note in notes)
+        {
+            <li>@note.Title</li>
+        }
+    </ul>
+}
+
+@code {
+    private HttpClient httpClient = null;
+    private List<NoteResponse> notes = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
+        await _refreshTokenService.TryRefreshToken();
+        await GetNoteList();
+    }
+
+    private async Task GetNoteList()
+    {
+        var accessToken = await _localStorage.GetItemAsync<string>("accessToken");
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+        var httpResponse = await httpClient.GetAsync("notes", HttpCompletionOption.ResponseHeadersRead);
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            notes = await httpResponse.Content.ReadFromJsonAsync<List<NoteResponse>>();
+        }
+        else
+        {
+            var errorModel = await httpResponse.Content.ReadFromJsonAsync<ErrorModel>();
+            _errorPopupService.ShowErrorPopup(errorModel.Error);
+        }
+        httpClient.DefaultRequestHeaders.Clear();
+    }
+}

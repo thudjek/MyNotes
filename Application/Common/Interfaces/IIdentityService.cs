@@ -11,6 +11,6 @@ public interface IIdentityService
     Task<Result<string>> GetTokenForIdentityPurpose(string email, TokenPurpose purpose);
     Task<Result> ConfirmEmail(string email, string token);
     Task<Result> ResetPassword(string email, string token, string password);
-    Task<Result<string>> ExternalLogin();
+    Task<Result<ExternalLoginInfoDto>> ExternalLogin();
     Task<TokensDto> GetExternalLoginTokens(string email, string provider);
 }

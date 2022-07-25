@@ -31,8 +31,8 @@ public class UpdateNoteCommandHandler : IRequestHandler<UpdateNoteCommand>
         if (note == null || note.CreatedBy != _currentUserService.UserId)
             throw new NotFoundException(nameof(Note), request.Id, _currentUserService.UserId, "Error has occurred with selected note");
 
-        note.Title = request.Title;
-        note.Content = request.Content;
+        note.Title = request.Title ?? string.Empty;
+        note.Content = request.Content ?? string.Empty;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
