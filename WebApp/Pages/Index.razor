@@ -2,7 +2,7 @@
 @using SharedModels.Responses.Notes
 @attribute [Authorize]
 @inject IHttpClientFactory _httpClientFactory
-@inject ErrorPopupService _errorPopupService
+@inject PopupMessageService _popupMessageService
 @inject ILocalStorageService _localStorage
 @inject RefreshTokenService _refreshTokenService
 
@@ -45,7 +45,7 @@ else
         else
         {
             var errorModel = await httpResponse.Content.ReadFromJsonAsync<ErrorModel>();
-            _errorPopupService.ShowErrorPopup(errorModel.Error);
+            _popupMessageService.ShowPopup(errorModel.Error, PopupMessageType.Error);
         }
         httpClient.DefaultRequestHeaders.Clear();
     }

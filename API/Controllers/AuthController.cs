@@ -106,6 +106,15 @@ public class AuthController : ApiBaseController
         return BadRequest(result.ToErrorModel());
     }
 
+    [HttpPost]
+    [Route("resend-confirmation-email")]
+    public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest request)
+    {
+        var command = Mapper.MapTo<ResendConfirmationEmailCommand>(request);
+        await Mediator.Send(command);
+        return Ok();
+    }
+
     [HttpGet]
     [Route("external-login/{provider}")]
     public IActionResult ExternalLogin([FromRoute] string provider)

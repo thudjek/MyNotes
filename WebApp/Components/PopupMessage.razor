@@ -1,0 +1,47 @@
+﻿@using WebApp.Common.Enums
+@inject PopupMessageService _popupMessageService;
+
+<div class="popup-message @cssClasses">
+    <p>@message</p>
+</div>
+
+@code {
+    private string message;
+    private PopupMessageType type;
+    private string cssClasses;
+
+    protected override void OnInitialized()
+    {
+        cssClasses = "d-none";
+        _popupMessageService.OnShow += ShowPopup;
+        _popupMessageService.OnHide += HidePopup;
+    }
+
+    private void ShowPopup(string message, PopupMessageType type)
+    {
+        this.message = message;
+        this.type = type;
+        cssClasses = "d-flex fade-in";
+
+        if (type == PopupMessageType.Error)
+            cssClasses += " popup-error";
+
+        if (type == PopupMessageType.Success)
+            cssClasses += " popup-success";
+
+        StateHasChanged();
+    }
+
+    private void HidePopup()
+    {
+        cssClasses = "d-flex fade-out";
+
+        if (type == PopupMessageType.Error)
+            cssClasses += " popup-error";
+
+        if (type == PopupMessageType.Success)
+            cssClasses += " popup-success";
+
+        StateHasChanged();
+    }
+}

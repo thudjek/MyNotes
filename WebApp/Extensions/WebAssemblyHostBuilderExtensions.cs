@@ -22,7 +22,7 @@ public static class WebAssemblyHostBuilderExtensions
         builder.Services.AddBlazoredLocalStorage();
         builder.Services.AddAuthorizationCore();
         builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
-        builder.Services.AddScoped<ErrorPopupService>();
+        builder.Services.AddScoped<PopupMessageService>();
         builder.Services.AddTransient<CookieHandler>();
         builder.Services.AddTransient<RefreshTokenService>();
 

@@ -75,6 +75,7 @@ h1:focus {
 
 .link:hover {
     color: #bebebe;
+    cursor: pointer;
 }
 
 .separator {
@@ -126,7 +127,7 @@ h1:focus {
     }
 }
 
-.error-popup {
+.popup-message {
     position: fixed;
     justify-content: center;
     width: 75%;
@@ -134,17 +135,25 @@ h1:focus {
     margin-left: 12.5%;
     font-weight: bold;
     color: #000000;
-    background-color: #ca3f3f;
     opacity: .85;
 }
 
-.error-popup p {
+.popup-message p {
     margin: 0;
     padding: .5rem;
 }
 
+.popup-error {
+    background-color: #ca3f3f;
+}
+
+.popup-success {
+    background-color: #2e964e;
+}
+
+
 @media(max-width: 575px) {
-    .error-popup {
+    .popup-message {
         font-size: 14px;
     }
 }

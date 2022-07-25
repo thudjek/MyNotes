@@ -1,18 +1,24 @@
 ﻿@page "/confirm-email"
+@layout NotAuthorizedLayout
 @using Microsoft.AspNetCore.WebUtilities
 @using SharedModels.Requests.Auth
 @inject IHttpClientFactory _httpClientFactory
+@inject PopupMessageService _popupMessageService
 @inject NavigationManager _navigationManager
 
-@if(isConfirmationSuccessful)
+@if(isConfirmationSuccessful.HasValue && isConfirmationSuccessful.Value == true)
+{
+    <h3>Email confirmation was successful. <a class="link" href="login">Login</a></h3>
+}
+
+@if(isConfirmationSuccessful.HasValue && isConfirmationSuccessful.Value == false)
 {
     <h3>Something went wrong while trying to confirm your email.</h3>
-    <h3>You can try to resend confirmation email and try again.</h3>
-    <button>Resend</button> //TODO
+    <h3>You can <a class="link" @onclick="ResendEmail">resend</a> confirmation email and try again.</h3>
 }
 
 @code {
-    private bool isConfirmationSuccessful = true;
+    private bool? isConfirmationSuccessful = null;
     private HttpClient httpClient = null;
     ConfirmEmailRequest confirmEmailRequest = new();
 
@@ -26,14 +32,15 @@
     private void MapQueryStringValuesToRequest()
     {
         var uri = _navigationManager.ToAbsoluteUri(_navigationManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("email", out var email))
+        var queryString = uri.Query.Replace("+", "*PLUS*");
+        if (QueryHelpers.ParseQuery(queryString).TryGetValue("email", out var email))
         {
-            confirmEmailRequest.Email = email;
+            confirmEmailRequest.Email = email.ToString().Replace("*PLUS*", "+");
         }
 
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("token", out var token))
+        if (QueryHelpers.ParseQuery(queryString).TryGetValue("token", out var token))
         {
-            confirmEmailRequest.Token = token;
+            confirmEmailRequest.Token = token.ToString().Replace("*PLUS*", "+");
         }
     }
 
@@ -42,11 +49,17 @@
         var httpResponse = await httpClient.PostAsJsonAsync("auth/confirm-email", confirmEmailRequest);
         if (httpResponse.IsSuccessStatusCode)
         {
-            _navigationManager.NavigateTo("login");
+            isConfirmationSuccessful = true;
         }
         else
         {
             isConfirmationSuccessful = false;
         }
+    }
+
+    private async Task ResendEmail()
+    {
+        await httpClient.PostAsJsonAsync("auth/resend-confirmation-email", new ResendConfirmationEmailRequest() { Email = confirmEmailRequest.Email ?? string.Empty });
+        _popupMessageService.ShowPopup("Confirmation email has been sent", PopupMessageType.Success);
     }
 }

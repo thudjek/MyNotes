@@ -2,8 +2,9 @@
 @layout NotAuthorizedLayout
 @using SharedModels.Requests.Auth
 @using SharedModels.Responses.Auth
+@using Microsoft.AspNetCore.WebUtilities
 @inject IHttpClientFactory _httpClientFactory
-@inject ErrorPopupService _errorPopupService
+@inject PopupMessageService _popupMessageService
 @inject ILocalStorageService _localStorage
 @inject AuthenticationStateProvider _authStateProvider
 @inject NavigationManager _navigationManager
@@ -30,7 +31,7 @@
 </EditForm>
 <div class="row">
     <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3 text-center">
-        <a class="link" href=#>Forgot your password?</a>
+        <a class="link" href="forgot-password">Forgot your password?</a>
     </div>
     <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
         <div class="separator">Or</div>
@@ -76,7 +77,7 @@
             }
             else
             {
-                _errorPopupService.ShowErrorPopup(errorModel.Error);
+                _popupMessageService.ShowPopup(errorModel.Error, PopupMessageType.Error);
             }
         }
     }

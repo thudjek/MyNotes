@@ -22,14 +22,15 @@
     private void MapQueryStringValuesToRequest()
     {
         var uri = _navigationManager.ToAbsoluteUri(_navigationManager.Uri);
+        var queryString = uri.Query.Replace("+", "*PLUS*");
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("email", out var email))
         {
-            externalLoginTokensRequest.Email = email;
+            externalLoginTokensRequest.Email = email.ToString().Replace("*PLUS*", "+");
         }
 
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("provider", out var provider))
         {
-            externalLoginTokensRequest.Provider = provider;
+            externalLoginTokensRequest.Provider = provider.ToString().Replace("*PLUS*", "+");
         }
     }
 

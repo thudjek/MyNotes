@@ -1,15 +1,16 @@
 ﻿namespace WebApp.Services;
 using System.Timers;
+using WebApp.Common.Enums;
 
-public class ErrorPopupService : IDisposable
+public class PopupMessageService : IDisposable
 {
-    public event Action<string> OnShow;
+    public event Action<string, PopupMessageType> OnShow;
     public event Action OnHide;
     private Timer Countdown;
 
-    public void ShowErrorPopup(string message)
+    public void ShowPopup(string message, PopupMessageType type)
     {
-        OnShow?.Invoke(message);
+        OnShow?.Invoke(message, type);
         StartCountdown();
     }
 
@@ -33,12 +34,12 @@ public class ErrorPopupService : IDisposable
         if (Countdown == null)
         {
             Countdown = new Timer(4000);
-            Countdown.Elapsed += HideErrorPopup;
+            Countdown.Elapsed += HidePopup;
             Countdown.AutoReset = false;
         }
     }
 
-    private void HideErrorPopup(object source, ElapsedEventArgs args)
+    private void HidePopup(object source, ElapsedEventArgs args)
     {
         OnHide?.Invoke();
     }

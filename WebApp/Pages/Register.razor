@@ -3,7 +3,7 @@
 @using SharedModels.Requests.Auth
 @using SharedModels.Responses.Auth
 @inject IHttpClientFactory _httpClientFactory
-@inject ErrorPopupService _errorPopupService;
+@inject PopupMessageService _popupMessageService
 
 @if (!isRegisterSuccessful)
 {
@@ -46,6 +46,7 @@
 else
 {
     <h3>Sign up successful, we've sent you confirmation email.</h3>
+    <h3>If email didn't arrive you can <a class="link" @onclick="ResendEmail">resend</a> confirmation email and try again.</h3>
 }
 
 @code {
@@ -76,8 +77,14 @@ else
             }
             else
             {
-                _errorPopupService.ShowErrorPopup(errorModel.Error);
+                _popupMessageService.ShowPopup(errorModel.Error, PopupMessageType.Error);
             }
         }
+    }
+
+    private async Task ResendEmail()
+    {
+        await httpClient.PostAsJsonAsync("auth/resend-confirmation-email", new ResendConfirmationEmailRequest() { Email = registerRequest.Email ?? string.Empty });
+        _popupMessageService.ShowPopup("Confirmation email has been sent", PopupMessageType.Success);
     }
 }
