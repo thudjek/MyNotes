@@ -1,0 +1,52 @@
+﻿@page "/confirm-email"
+@using Microsoft.AspNetCore.WebUtilities
+@using SharedModels.Requests.Auth
+@inject IHttpClientFactory _httpClientFactory
+@inject NavigationManager _navigationManager
+
+@if(isConfirmationSuccessful)
+{
+    <h3>Something went wrong while trying to confirm your email.</h3>
+    <h3>You can try to resend confirmation email and try again.</h3>
+    <button>Resend</button> //TODO
+}
+
+@code {
+    private bool isConfirmationSuccessful = true;
+    private HttpClient httpClient = null;
+    ConfirmEmailRequest confirmEmailRequest = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
+        MapQueryStringValuesToRequest();
+        await PostRequest();
+    }
+
+    private void MapQueryStringValuesToRequest()
+    {
+        var uri = _navigationManager.ToAbsoluteUri(_navigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("email", out var email))
+        {
+            confirmEmailRequest.Email = email;
+        }
+
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("token", out var token))
+        {
+            confirmEmailRequest.Token = token;
+        }
+    }
+
+    private async Task PostRequest()
+    {
+        var httpResponse = await httpClient.PostAsJsonAsync("auth/confirm-email", confirmEmailRequest);
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            _navigationManager.NavigateTo("login");
+        }
+        else
+        {
+            isConfirmationSuccessful = false;
+        }
+    }
+}
