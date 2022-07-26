@@ -6,21 +6,6 @@
 @inject ILocalStorageService _localStorage
 @inject RefreshTokenService _refreshTokenService
 
-<h1>Index page</h1>
-
-@if (notes == null)
-{
-    <h3>You have no notes</h3>
-}
-else
-{
-    <ul>
-        @foreach(var note in notes)
-        {
-            <li>@note.Title</li>
-        }
-    </ul>
-}
 
 @code {
     private HttpClient httpClient = null;
@@ -30,10 +15,10 @@ else
     {
         httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
         await _refreshTokenService.TryRefreshToken();
-        await GetNoteList();
+        await GetNotes();
     }
 
-    private async Task GetNoteList()
+    private async Task GetNotes()
     {
         var accessToken = await _localStorage.GetItemAsync<string>("accessToken");
         httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");

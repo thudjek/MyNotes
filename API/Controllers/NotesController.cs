@@ -49,10 +49,24 @@ public class NotesController : ApiBaseController
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    [HttpPost("delete/{id}")]
     public async Task<IActionResult> DeleteNote(int id)
     {
         await Mediator.Send(new DeleteNoteCommand() { Id = id });
+        return NoContent();
+    }
+
+    [HttpPost("restore/{id}")]
+    public async Task<IActionResult> RestoreNote(int id)
+    {
+        await Mediator.Send(new RestoreNoteCommand() { Id = id });
+        return NoContent();
+    }
+
+    [HttpPost("empty-trash")]
+    public async Task<IActionResult> EmptyTrash()
+    {
+        await Mediator.Send(new EmptyTrashCommand());
         return NoContent();
     }
 }
