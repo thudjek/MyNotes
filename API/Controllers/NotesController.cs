@@ -21,11 +21,21 @@ public class NotesController : ApiBaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetNoteList()
+    public async Task<IActionResult> GetNoteList([FromQuery] string filter)
     {
-        var noteResponseList = await Mediator.Send(new GetNoteListQuery());
-        if (noteResponseList == null)
-            return Ok();
+        //var noteResponseList = await Mediator.Send(new GetNoteListQuery() { Filter = filter });
+        //if (noteResponseList == null)
+        //    return Ok();
+
+        var noteResponseList = new List<SharedModels.Responses.Notes.NoteResponse>();
+        noteResponseList.Add(new SharedModels.Responses.Notes.NoteResponse() { Title = "Za kupiti", Content = "kruske, jabuke, sljive" });
+        noteResponseList.Add(new SharedModels.Responses.Notes.NoteResponse() { Title = "Tasks", Content = "prvi, drugi" });
+        noteResponseList.Add(new SharedModels.Responses.Notes.NoteResponse() { Title = "Nekaj", Content = "ocu i necu" });
+
+        if (!string.IsNullOrWhiteSpace(filter))
+            noteResponseList = noteResponseList.Where(n => n.Title.ToLower().Contains(filter.ToLower()) || n.Content.ToLower().Contains(filter.ToLower())).ToList();
+
+        await Task.CompletedTask;
 
         return Ok(noteResponseList);
     }

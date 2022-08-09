@@ -1,0 +1,17 @@
+﻿<button class="btn btn-primary" type="button" @onclick="ClickHandler">
+    @ChildContent
+</button>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [CascadingParameter]
+    public Dropdown ParentDropdown { get; set; }
+
+    protected void ClickHandler()
+    {
+        if (ParentDropdown != null)
+            ParentDropdown.Toggle();
+    }
+}

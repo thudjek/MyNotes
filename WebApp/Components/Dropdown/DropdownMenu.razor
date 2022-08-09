@@ -1,0 +1,13 @@
+﻿<div class="mn-dropdown @(ParentDropdown.IsVisible ? "" : "d-none")">
+    <ul>
+        @ChildContent
+    </ul>
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [CascadingParameter]
+    public Dropdown ParentDropdown { get; set; }
+}

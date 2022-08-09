@@ -52,6 +52,9 @@ public class RefreshTokenService
             ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
         }
         else
-            _navigationManager.NavigateTo("logout");
+        {
+            await _localStorage.RemoveItemAsync("accessToken");
+            _navigationManager.NavigateTo("login", true);
+        } 
     }
 }

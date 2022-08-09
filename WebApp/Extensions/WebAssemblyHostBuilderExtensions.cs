@@ -23,14 +23,14 @@ public static class WebAssemblyHostBuilderExtensions
         builder.Services.AddAuthorizationCore();
         builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
         builder.Services.AddScoped<PopupMessageService>();
-        builder.Services.AddTransient<CookieHandler>();
+        builder.Services.AddTransient<InterceptingHttpRequestHandler>();
         builder.Services.AddTransient<RefreshTokenService>();
 
         builder.Services.AddHttpClient(Constants.HttpClientName, httpClient => 
         {
             httpClient.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]);
         })
-        .AddHttpMessageHandler<CookieHandler>();
+        .AddHttpMessageHandler<InterceptingHttpRequestHandler>();
 
         return builder;
     }

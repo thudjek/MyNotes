@@ -2,13 +2,14 @@
 
 public static class HttpContextExtensions
 {
-    public static void AddCookieToResponse(this HttpContext httpContext, string key, string value, bool httpOnly)
+    public static void AddCookieToResponse(this HttpContext httpContext, string key, string value, bool httpOnly, DateTime expires)
     {
         httpContext.Response.Cookies.Append(key, value, new CookieOptions() 
         { 
             HttpOnly = httpOnly,
             SameSite = SameSiteMode.None,
-            Secure = true
+            Secure = true,
+            Expires = expires
         });
     }
 

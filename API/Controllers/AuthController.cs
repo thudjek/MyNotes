@@ -1,7 +1,9 @@
 ﻿using API.Extensions;
 using Application.Common;
+using Application.Common.Interfaces;
 using Application.Features.Auth.Commands;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedModels.Requests.Auth;
 
@@ -10,9 +12,11 @@ namespace API.Controllers;
 public class AuthController : ApiBaseController
 {
     private readonly IConfiguration _configuration;
-    public AuthController(IConfiguration configuration)
+    private readonly IDateTimeService _dateTimeService;
+    public AuthController(IConfiguration configuration, IDateTimeService dateTimeService)
     {
         _configuration = configuration;
+        _dateTimeService = dateTimeService;
     }
 
     [HttpPost]
@@ -36,7 +40,7 @@ public class AuthController : ApiBaseController
         if (result.IsSuccess)
         {
             HttpContext.Response.Cookies.Delete("refreshToken");
-            HttpContext.AddCookieToResponse("refreshToken", result.Value.RefreshToken, true);
+            HttpContext.AddCookieToResponse("refreshToken", result.Value.RefreshToken, true, _dateTimeService.Now.AddYears(1));
             return Ok(new { result.Value.AccessToken });
         }
 
@@ -49,17 +53,18 @@ public class AuthController : ApiBaseController
     {
         var command = Mapper.MapTo<RefreshTokenCommand>(request);
         command.RefreshToken = HttpContext.GetValueFromCookie("refreshToken");
+        HttpContext.Response.Cookies.Delete("refreshToken");
         var result = await Mediator.Send(command);
         if (result.IsSuccess)
         {
-            HttpContext.Response.Cookies.Delete("refreshToken");
-            HttpContext.AddCookieToResponse("refreshToken", result.Value.RefreshToken, true);
+            HttpContext.AddCookieToResponse("refreshToken", result.Value.RefreshToken, true, _dateTimeService.Now.AddYears(1));
             return Ok(result.Value);
         }
 
         return Unauthorized(result.ToErrorModel());
     }
 
+    [Authorize]
     [HttpPost]
     [Route("revoke-refresh-token")]
     public async Task<IActionResult> RevokeRefreshToken()
@@ -143,7 +148,7 @@ public class AuthController : ApiBaseController
         var command = Mapper.MapTo<ExternalLoginTokensCommand>(request);
         var tokensDto = await Mediator.Send(command);
         if(!string.IsNullOrWhiteSpace(tokensDto.RefreshToken))
-            HttpContext.AddCookieToResponse("refreshToken", tokensDto.RefreshToken, true);
+            HttpContext.AddCookieToResponse("refreshToken", tokensDto.RefreshToken, true, _dateTimeService.Now.AddYears(1));
 
         return Ok(new { tokensDto.AccessToken });
     }

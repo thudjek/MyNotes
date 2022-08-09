@@ -3,6 +3,7 @@
 @inject ILocalStorageService _localStorage
 @inject IHttpClientFactory _httpClientFactory
 @inject NavigationManager _navigationManager
+@inject RefreshTokenService _refreshTokenService
 
 @code {
     private HttpClient httpClient = null;
@@ -10,8 +11,16 @@
     protected override async Task OnInitializedAsync()
     {
         httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
+        await _refreshTokenService.TryRefreshToken();
+        await RevokeRefreshToken();
         await _localStorage.RemoveItemAsync("accessToken");
-        await httpClient.PostAsync("auth/revoke-refresh-token", null);
         _navigationManager.NavigateTo("login");
+    }
+
+    private async Task RevokeRefreshToken()
+    {
+        var accessToken = await _localStorage.GetItemAsync<string>("accessToken");
+        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+        await httpClient.PostAsync("auth/revoke-refresh-token", null);
     }
 }

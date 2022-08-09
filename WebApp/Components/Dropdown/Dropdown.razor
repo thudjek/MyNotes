@@ -1,0 +1,33 @@
+﻿<CascadingValue Value="@this" IsFixed>
+    <div class="dropdown">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    public void Toggle()
+    {
+        IsVisible = !IsVisible;
+        StateHasChanged();
+    }    
+
+    public void Show()
+    {
+        if (!IsVisible)
+            Toggle();
+    }
+
+    [JSInvokable]
+    public void Hide()
+    {
+        if (IsVisible)
+            Toggle();
+    }
+}

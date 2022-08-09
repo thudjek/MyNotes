@@ -1,11 +1,36 @@
 ﻿@page "/"
 @using SharedModels.Responses.Notes
+@using WebApp.Components.Dropdown
 @attribute [Authorize]
 @inject IHttpClientFactory _httpClientFactory
 @inject PopupMessageService _popupMessageService
 @inject ILocalStorageService _localStorage
 @inject RefreshTokenService _refreshTokenService
 
+<div class="sidebar"> 
+    <div class="sidebar-header">
+        <Dropdown>
+            <DropdownToggleText Id="dropdownToggleText">thudjek@gmail.com <i class="bi bi-caret-down font-14"></i></DropdownToggleText>
+            <DropdownMenu>
+                <DropdownItem Href="logout">Logout</DropdownItem>
+            </DropdownMenu>
+        </Dropdown>
+    </div>
+    <div class="sidebar-item">
+        <SearchBar SearchChangedCallback="GetNotes" />
+    </div>
+</div>
+<div class="d-inline-block">
+    @if (notes != null && notes.Count > 0)
+    {
+        <ul>
+            @foreach(var note in notes)
+            {
+                <li>Title: @note.Title, Content: @note.Content</li>
+            }
+        </ul>    
+    }
+</div>
 
 @code {
     private HttpClient httpClient = null;
@@ -18,11 +43,10 @@
         await GetNotes();
     }
 
-    private async Task GetNotes()
+    private async Task GetNotes(string filter = "")
     {
-        var accessToken = await _localStorage.GetItemAsync<string>("accessToken");
-        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-        var httpResponse = await httpClient.GetAsync("notes", HttpCompletionOption.ResponseHeadersRead);
+        var queryString = !string.IsNullOrWhiteSpace(filter) ? "?filter=" + filter : "";
+        var httpResponse = await httpClient.GetAsync($"notes{queryString}", HttpCompletionOption.ResponseHeadersRead);
         if (httpResponse.IsSuccessStatusCode)
         {
             notes = await httpResponse.Content.ReadFromJsonAsync<List<NoteResponse>>();
@@ -30,8 +54,7 @@
         else
         {
             var errorModel = await httpResponse.Content.ReadFromJsonAsync<ErrorModel>();
-            _popupMessageService.ShowPopup(errorModel.Error, PopupMessageType.Error);
+            _popupMessageService.ShowPopup(errorModel.Error, PopupMessageType.Error); //how to handle potential 401? try error boundry for other unhandeled exceptions
         }
-        httpClient.DefaultRequestHeaders.Clear();
     }
 }

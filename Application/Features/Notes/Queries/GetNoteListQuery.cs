@@ -7,6 +7,7 @@ using SharedModels.Responses.Notes;
 namespace Application.Features.Notes.Queries;
 public class GetNoteListQuery : IRequest<List<NoteResponse>>
 {
+    public string Filter { get; set; }
 }
 
 public class GetNoteListQueryHandler : IRequestHandler<GetNoteListQuery, List<NoteResponse>>
@@ -21,18 +22,23 @@ public class GetNoteListQueryHandler : IRequestHandler<GetNoteListQuery, List<No
 
     public async Task<List<NoteResponse>> Handle(GetNoteListQuery request, CancellationToken cancellationToken)
     {
-        var noteResponseList = await _dbContext.Notes
+        var query = _dbContext.Notes
             .Include(n => n.Permissions)
-            .Where(n => n.CreatedBy == _currentUserService.UserId || 
-                        n.Permissions.Any(p => p.Email == _currentUserService.Email && (p.Scope == (int)PermissionScope.Read || p.Scope == (int)PermissionScope.ReadAndWrite)))
-            .Select(n => new NoteResponse()
-            {
-                Id = n.Id,
-                Title = n.Title,
-                Content = n.Content,
-                Owned = n.CreatedBy == _currentUserService.UserId
-            })
-            .ToListAsync(cancellationToken);
+            .Where(n => n.CreatedBy == _currentUserService.UserId ||
+                        n.Permissions.Any(p => p.Email == _currentUserService.Email && (p.Scope == (int)PermissionScope.Read || p.Scope == (int)PermissionScope.ReadAndWrite)));
+
+        if (!string.IsNullOrWhiteSpace(request.Filter))
+            query = query.Where(n => n.Title.ToLower().Contains(request.Filter.ToLower()) || n.Content.ToLower().Contains(request.Filter.ToLower()));
+
+        var noteResponseList = await query
+        .Select(n => new NoteResponse()
+        {
+            Id = n.Id,
+            Title = n.Title,
+            Content = n.Content,
+            Owned = n.CreatedBy == _currentUserService.UserId
+        })
+        .ToListAsync(cancellationToken);
 
         return noteResponseList;
     }

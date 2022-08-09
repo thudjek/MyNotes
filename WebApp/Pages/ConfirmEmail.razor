@@ -20,7 +20,7 @@
 @code {
     private bool? isConfirmationSuccessful = null;
     private HttpClient httpClient = null;
-    ConfirmEmailRequest confirmEmailRequest = new();
+    private ConfirmEmailRequest confirmEmailRequest = new();
 
     protected override async Task OnInitializedAsync()
     {

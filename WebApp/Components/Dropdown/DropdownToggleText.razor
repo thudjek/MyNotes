@@ -1,0 +1,36 @@
+﻿@implements IDisposable
+@inject IJSRuntime _jsRuntime;
+
+<div id="@Id" class="d-inline cursor-pointer" @onclick="ClickHandler">
+    @ChildContent
+</div>
+
+@code {
+    private DotNetObjectReference<Dropdown> dropdownObjRef;
+
+    protected async override Task OnInitializedAsync()
+    {
+        dropdownObjRef = DotNetObjectReference.Create(this.ParentDropdown);
+        await _jsRuntime.InvokeVoidAsync("addDropdownCloseEventListener", dropdownObjRef, Id);
+    }
+
+    [Parameter]
+    public string Id { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [CascadingParameter]
+    public Dropdown ParentDropdown { get; set; }
+
+    protected void ClickHandler()
+    {
+        if (ParentDropdown != null)
+            ParentDropdown.Toggle();
+    }
+
+    public void Dispose()
+    {
+        dropdownObjRef?.Dispose();
+    }
+}

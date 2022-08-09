@@ -1,0 +1,18 @@
+﻿<li><a class="mn-dropdown-item" href="@Href">@ChildContent</a></li>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Href { get; set; }
+
+    [CascadingParameter]
+    public Dropdown ParentDropdown { get; set; }
+
+    protected void ClickHandler()
+    {
+        if (ParentDropdown != null)
+            ParentDropdown.Hide();
+    }
+}
