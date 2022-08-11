@@ -26,6 +26,13 @@ public static class WebAssemblyHostBuilderExtensions
         builder.Services.AddTransient<InterceptingHttpRequestHandler>();
         builder.Services.AddTransient<RefreshTokenService>();
 
+        builder.Services.AddHttpClient<ApiService>(httpClient => 
+        {
+            httpClient.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]);
+        })
+        .AddHttpMessageHandler<InterceptingHttpRequestHandler>(); ;
+
+
         builder.Services.AddHttpClient(Constants.HttpClientName, httpClient => 
         {
             httpClient.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]);
