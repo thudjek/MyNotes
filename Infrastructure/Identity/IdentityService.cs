@@ -61,6 +61,9 @@ public class IdentityService : IIdentityService
 
     public async Task<Result<TokensDto>> RefreshToken(string accessToken, string refreshToken)
     {
+        if(string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(refreshToken))
+            return Result<TokensDto>.Failure();
+
         var principal = GetClaimsPrincipalFromAccessToken(accessToken);
         if (principal == null)
             return Result<TokensDto>.Failure();

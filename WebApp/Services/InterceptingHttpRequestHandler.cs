@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using SharedModels;
 using System.Net;
-using System.Net.Http.Json;
 using WebApp.Extensions;
 
 namespace WebApp.Services;

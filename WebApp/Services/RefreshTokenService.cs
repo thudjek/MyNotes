@@ -13,15 +13,11 @@ public class RefreshTokenService
 {
     private readonly AuthenticationStateProvider _authStateProvider;
     private readonly ILocalStorageService _localStorage;
-    private readonly HttpClient _httpClient;
-    private readonly NavigationManager _navigationManager;
     private readonly ApiService _apiService;
-    public RefreshTokenService(AuthenticationStateProvider authStateProvider, ILocalStorageService localStorage, IHttpClientFactory httpClientFactory, NavigationManager navigationManager, ApiService apiService)
+    public RefreshTokenService(AuthenticationStateProvider authStateProvider, ILocalStorageService localStorage, ApiService apiService)
     {
         _authStateProvider = authStateProvider;
         _localStorage = localStorage;
-        _httpClient = httpClientFactory.CreateClient(Constants.HttpClientName);
-        _navigationManager = navigationManager;
         _apiService = apiService;
     }
 
