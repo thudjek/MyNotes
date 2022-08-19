@@ -44,7 +44,7 @@ public class AuthController : ApiBaseController
             return Ok(new { result.Value.AccessToken });
         }
 
-        return Unauthorized(result.ToErrorModel());
+        return BadRequest(result.ToErrorModel());
     }
 
     [HttpPost]

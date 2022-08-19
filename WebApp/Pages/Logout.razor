@@ -1,26 +1,27 @@
 ﻿@page "/logout"
 @using Blazored.LocalStorage
 @inject ILocalStorageService _localStorage
-@inject IHttpClientFactory _httpClientFactory
 @inject NavigationManager _navigationManager
 @inject RefreshTokenService _refreshTokenService
+@inject ApiService _apiService
 
 @code {
-    private HttpClient httpClient = null;
-
     protected override async Task OnInitializedAsync()
     {
-        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
-        await _refreshTokenService.TryRefreshToken();
-        await RevokeRefreshToken();
-        await _localStorage.RemoveItemAsync("accessToken");
-        _navigationManager.NavigateTo("login");
-    }
+        try
+        {
+            await _refreshTokenService.TryRefreshToken();
+            await _apiService.Post("auth/revoke-refresh-token");
 
-    private async Task RevokeRefreshToken()
-    {
-        var accessToken = await _localStorage.GetItemAsync<string>("accessToken");
-        httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
-        await httpClient.PostAsync("auth/revoke-refresh-token", null);
+        }
+        catch
+        {
+            
+        }
+        finally 
+        { 
+            await _localStorage.RemoveItemAsync("accessToken");
+            _navigationManager.NavigateTo("login");
+        }
     }
 }

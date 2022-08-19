@@ -3,11 +3,12 @@
 @using SharedModels.Requests.Auth
 @using SharedModels.Responses.Auth
 @using Microsoft.AspNetCore.WebUtilities
-@inject IHttpClientFactory _httpClientFactory
+@using WebApp.Common.Exceptions
 @inject PopupMessageService _popupMessageService
 @inject ILocalStorageService _localStorage
 @inject AuthenticationStateProvider _authStateProvider
 @inject NavigationManager _navigationManager
+@inject ApiService _apiService
 
 <EditForm Model="@loginRequest" OnSubmit="SubmitLogin">
     <CustomValidator @ref="customValidator" />
@@ -49,41 +50,30 @@
 </div>
 @code {
     private LoginRequest loginRequest = new ();
-    private HttpClient httpClient = null;
     private CustomValidator customValidator;
-
-    protected override void OnInitialized()
-    {
-        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
-    }
 
     private async Task SubmitLogin()
     {
-        var httpResponse = await httpClient.PostAsJsonAsync("auth/login", loginRequest);
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
-            var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
+            var tokenResponse = await _apiService.Post<LoginRequest, TokenResponse>("auth/login", loginRequest);
             await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
             ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
             _navigationManager.NavigateTo("/");
         }
-        else
+        catch (ValidationException ex)
         {
-            var errorModel = await httpResponse.Content.ReadFromJsonAsync<ErrorModel>();
-            if (errorModel.Errors != null)
-            {
-                customValidator.ClearErrors();
-                customValidator.DisplayErrors(errorModel.ErrorsGrouped);
-            }
-            else
-            {
-                _popupMessageService.ShowPopup(errorModel.Error, PopupMessageType.Error);
-            }
+            customValidator.ClearErrors();
+            customValidator.DisplayErrors(ex.ErrorsGrouped);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
         }
     }
 
     private void ExternalLogin(string provider)
     {
-        _navigationManager.NavigateTo($"{httpClient.BaseAddress}auth/external-login/{provider}");
+        _navigationManager.NavigateTo($"{_apiService.GetBaseAddress()}auth/external-login/{provider}");
     }
 }

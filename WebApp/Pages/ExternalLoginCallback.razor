@@ -2,18 +2,16 @@
 @using SharedModels.Requests.Auth
 @using Microsoft.AspNetCore.WebUtilities
 @using SharedModels.Responses.Auth
-@inject IHttpClientFactory _httpClientFactory
 @inject ILocalStorageService _localStorage
 @inject AuthenticationStateProvider _authStateProvider
 @inject NavigationManager _navigationManager
+@inject ApiService _apiService
 
 @code {
-    private HttpClient httpClient = null;
     private ExternalLoginTokensRequest externalLoginTokensRequest = new();
 
     protected override async Task OnInitializedAsync()
     {
-        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
         MapQueryStringValuesToRequest();
         await PostRequest();
         _navigationManager.NavigateTo("/");
@@ -36,12 +34,15 @@
 
     private async Task PostRequest()
     {
-        var httpResponse = await httpClient.PostAsJsonAsync("auth/external-login-tokens", externalLoginTokensRequest);
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
-            var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
+            var tokenResponse = await _apiService.Post<ExternalLoginTokensRequest, TokenResponse>("auth/external-login-tokens", externalLoginTokensRequest);
             await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
             ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
+        }
+        catch
+        {
+            _navigationManager.NavigateTo("login");
         }
     }
 }

@@ -2,10 +2,10 @@
 @using SharedModels.Responses.Notes
 @using WebApp.Components.Dropdown
 @attribute [Authorize]
-@inject IHttpClientFactory _httpClientFactory
 @inject PopupMessageService _popupMessageService
 @inject ILocalStorageService _localStorage
 @inject RefreshTokenService _refreshTokenService
+@inject ApiService _apiService
 
 <div class="sidebar"> 
     <div class="sidebar-header">
@@ -33,28 +33,24 @@
 </div>
 
 @code {
-    private HttpClient httpClient = null;
     private List<NoteResponse> notes = null;
 
     protected override async Task OnInitializedAsync()
     {
-        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
         await _refreshTokenService.TryRefreshToken();
         await GetNotes();
     }
 
     private async Task GetNotes(string filter = "")
     {
-        var queryString = !string.IsNullOrWhiteSpace(filter) ? "?filter=" + filter : "";
-        var httpResponse = await httpClient.GetAsync($"notes{queryString}", HttpCompletionOption.ResponseHeadersRead);
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
-            notes = await httpResponse.Content.ReadFromJsonAsync<List<NoteResponse>>();
+            var queryString = !string.IsNullOrWhiteSpace(filter) ? "?filter=" + filter : "";
+            notes = await _apiService.Get<List<NoteResponse>>("notes", queryString); 
         }
-        else
+        catch (ApplicationException ex)
         {
-            var errorModel = await httpResponse.Content.ReadFromJsonAsync<ErrorModel>();
-            _popupMessageService.ShowPopup(errorModel.Error, PopupMessageType.Error); //how to handle potential 401? try error boundry for other unhandeled exceptions
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
         }
     }
 }

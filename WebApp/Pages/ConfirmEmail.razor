@@ -2,9 +2,9 @@
 @layout NotAuthorizedLayout
 @using Microsoft.AspNetCore.WebUtilities
 @using SharedModels.Requests.Auth
-@inject IHttpClientFactory _httpClientFactory
 @inject PopupMessageService _popupMessageService
 @inject NavigationManager _navigationManager
+@inject ApiService _apiService
 
 @if(isConfirmationSuccessful.HasValue && isConfirmationSuccessful.Value == true)
 {
@@ -19,12 +19,10 @@
 
 @code {
     private bool? isConfirmationSuccessful = null;
-    private HttpClient httpClient = null;
     private ConfirmEmailRequest confirmEmailRequest = new();
 
     protected override async Task OnInitializedAsync()
     {
-        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
         MapQueryStringValuesToRequest();
         await PostRequest();
     }
@@ -46,12 +44,12 @@
 
     private async Task PostRequest()
     {
-        var httpResponse = await httpClient.PostAsJsonAsync("auth/confirm-email", confirmEmailRequest);
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
+            await _apiService.Post<ConfirmEmailRequest>("auth/confirm-email", confirmEmailRequest);
             isConfirmationSuccessful = true;
         }
-        else
+        catch
         {
             isConfirmationSuccessful = false;
         }
@@ -59,7 +57,14 @@
 
     private async Task ResendEmail()
     {
-        await httpClient.PostAsJsonAsync("auth/resend-confirmation-email", new ResendConfirmationEmailRequest() { Email = confirmEmailRequest.Email ?? string.Empty });
-        _popupMessageService.ShowPopup("Confirmation email has been sent", PopupMessageType.Success);
+        try
+        {
+            await _apiService.Post<ResendConfirmationEmailRequest>("auth/resend-confirmation-email", new ResendConfirmationEmailRequest() { Email = confirmEmailRequest.Email ?? string.Empty });
+            _popupMessageService.ShowPopup("Confirmation email has been sent", PopupMessageType.Success);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
     }
 }

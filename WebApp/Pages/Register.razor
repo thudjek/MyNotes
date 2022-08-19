@@ -2,8 +2,9 @@
 @layout NotAuthorizedLayout
 @using SharedModels.Requests.Auth
 @using SharedModels.Responses.Auth
-@inject IHttpClientFactory _httpClientFactory
+@using WebApp.Common.Exceptions
 @inject PopupMessageService _popupMessageService
+@inject ApiService _apiService
 
 @if (!isRegisterSuccessful)
 {
@@ -45,46 +46,43 @@
 }
 else
 {
-    <h3>Sign up successful, we've sent you confirmation email.</h3>
+    <h3>Sign up successful, we've sent you a confirmation email.</h3>
     <h3>If email didn't arrive you can <a class="link" @onclick="ResendEmail">resend</a> confirmation email and try again.</h3>
 }
 
 @code {
     private bool isRegisterSuccessful = false;
     private RegisterRequest registerRequest = new ();
-    private HttpClient httpClient = null;
     private CustomValidator customValidator;
-
-    protected override void OnInitialized()
-    {
-        httpClient = _httpClientFactory.CreateClient(Constants.HttpClientName);
-    }
 
     private async Task SubmitRegister()
     {
-        var httpResponse = await httpClient.PostAsJsonAsync("auth/register", registerRequest);
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
-            isRegisterSuccessful = true; 
+            await _apiService.Post<RegisterRequest>("auth/register", registerRequest);
+            isRegisterSuccessful = true;
         }
-        else
+        catch (ValidationException ex)
         {
-            var errorModel = await httpResponse.Content.ReadFromJsonAsync<ErrorModel>();
-            if (errorModel.Errors != null)
-            {
-                customValidator.ClearErrors();
-                customValidator.DisplayErrors(errorModel.ErrorsGrouped);
-            }
-            else
-            {
-                _popupMessageService.ShowPopup(errorModel.Error, PopupMessageType.Error);
-            }
+            customValidator.ClearErrors();
+            customValidator.DisplayErrors(ex.ErrorsGrouped);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
         }
     }
 
     private async Task ResendEmail()
     {
-        await httpClient.PostAsJsonAsync("auth/resend-confirmation-email", new ResendConfirmationEmailRequest() { Email = registerRequest.Email ?? string.Empty });
-        _popupMessageService.ShowPopup("Confirmation email has been sent", PopupMessageType.Success);
+        try
+        {
+            await _apiService.Post<ResendConfirmationEmailRequest>("auth/resend-confirmation-email", new ResendConfirmationEmailRequest() { Email = registerRequest.Email ?? string.Empty });
+            _popupMessageService.ShowPopup("Confirmation email has been sent", PopupMessageType.Success);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
     }
 }

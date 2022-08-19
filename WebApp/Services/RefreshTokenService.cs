@@ -15,12 +15,14 @@ public class RefreshTokenService
     private readonly ILocalStorageService _localStorage;
     private readonly HttpClient _httpClient;
     private readonly NavigationManager _navigationManager;
-    public RefreshTokenService(AuthenticationStateProvider authStateProvider, ILocalStorageService localStorage, IHttpClientFactory httpClientFactory, NavigationManager navigationManager)
+    private readonly ApiService _apiService;
+    public RefreshTokenService(AuthenticationStateProvider authStateProvider, ILocalStorageService localStorage, IHttpClientFactory httpClientFactory, NavigationManager navigationManager, ApiService apiService)
     {
         _authStateProvider = authStateProvider;
         _localStorage = localStorage;
         _httpClient = httpClientFactory.CreateClient(Constants.HttpClientName);
         _navigationManager = navigationManager;
+        _apiService = apiService;
     }
 
     public async Task TryRefreshToken()
@@ -44,17 +46,8 @@ public class RefreshTokenService
     {
         var accessToken = await _localStorage.GetItemAsync<string>("accessToken");
         var refreshTokenRequest = new RefreshTokenRequest() { AccessToken = accessToken };
-        var httpResponse = await _httpClient.PostAsJsonAsync("auth/refresh-token", refreshTokenRequest);
-        if (httpResponse.IsSuccessStatusCode)
-        {
-            var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
-            await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
-            ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
-        }
-        else
-        {
-            await _localStorage.RemoveItemAsync("accessToken");
-            _navigationManager.NavigateTo("login", true);
-        } 
+        var tokenResponse = await _apiService.Post<RefreshTokenRequest, TokenResponse>("auth/refresh-token", refreshTokenRequest);
+        await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
+        ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
     }
 }

@@ -1,13 +1,21 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using SharedModels;
+using System.Net;
+using System.Net.Http.Json;
+using WebApp.Extensions;
+
 namespace WebApp.Services;
 
 public class InterceptingHttpRequestHandler : DelegatingHandler
 {
     private readonly ILocalStorageService _localStorageService;
-    public InterceptingHttpRequestHandler(ILocalStorageService localStorageService)
+    private readonly NavigationManager _navigationManager;
+    public InterceptingHttpRequestHandler(ILocalStorageService localStorageService, NavigationManager navigationManager)
     {
         _localStorageService = localStorageService;
+        _navigationManager = navigationManager;
     }
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -19,16 +27,15 @@ public class InterceptingHttpRequestHandler : DelegatingHandler
         {
             response = await base.SendAsync(request, cancellationToken);
         }
-        catch(Exception ex)
+        catch
         {
-            var mess = ex.Message;
-            throw;
+            throw new ApplicationException(new ErrorModel().Error); //logging maybe?
         }
         finally
         {
-            if (response != null)
+            if (response != null && !response.IsSuccessStatusCode)
             {
-                //
+                await HandleUnsuccessfulStatusCode(response);
             }
         }
 
@@ -45,5 +52,19 @@ public class InterceptingHttpRequestHandler : DelegatingHandler
         var accessToken = await _localStorageService.GetItemAsync<string>("accessToken");
         if (request.Headers.Authorization == null && !string.IsNullOrWhiteSpace(accessToken))
             request.Headers.Add("Authorization", $"Bearer {accessToken}");
+    }
+
+    private async Task HandleUnsuccessfulStatusCode(HttpResponseMessage response)
+    {
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.Unauthorized:
+                await _localStorageService.RemoveItemAsync("accessToken");
+                _navigationManager.NavigateTo("login", true);
+                break;
+            default:
+                await response.ThrowExceptionFromErrorModel();
+                break;
+        }
     }
 }
