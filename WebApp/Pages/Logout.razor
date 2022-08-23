@@ -10,7 +10,6 @@
     {
         try
         {
-            await _refreshTokenService.TryRefreshToken();
             await _apiService.Post("auth/revoke-refresh-token");
 
         }
@@ -21,7 +20,7 @@
         finally 
         { 
             await _localStorage.RemoveItemAsync("accessToken");
-            _navigationManager.NavigateTo("login");
+            _navigationManager.NavigateTo("login", true);
         }
     }
 }

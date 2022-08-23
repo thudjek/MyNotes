@@ -37,7 +37,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await _refreshTokenService.TryRefreshToken();
         await GetNotes();
     }
 

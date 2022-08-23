@@ -256,12 +256,12 @@ public class IdentityService : IIdentityService
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        _ = int.TryParse(_configuration["JWT:AccessTokenValidityInMinutes"], out int tokenValidityInMinutes);
+        _ = int.TryParse(_configuration["JWT:AccessTokenValidityInSeconds"], out int tokenValidityInSeconds);
 
         var token = new JwtSecurityToken(
             issuer: _configuration["JWT:ValidIssuer"],
             audience: _configuration["JWT:ValidAudience"],
-            expires: _dateTimeService.Now.AddMinutes(tokenValidityInMinutes),
+            expires: _dateTimeService.Now.AddSeconds(tokenValidityInSeconds),
             claims: claims,
             signingCredentials: credentials);
 

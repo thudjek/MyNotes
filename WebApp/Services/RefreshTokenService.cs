@@ -1,49 +1,43 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using SharedModels.Requests.Auth;
 using SharedModels.Responses.Auth;
 using System.Net.Http.Json;
 using WebApp.Auth;
-using WebApp.Common;
 
 namespace WebApp.Services;
 
 public class RefreshTokenService
 {
+    private readonly HttpClient _httpClient;
     private readonly AuthenticationStateProvider _authStateProvider;
     private readonly ILocalStorageService _localStorage;
-    private readonly ApiService _apiService;
-    public RefreshTokenService(AuthenticationStateProvider authStateProvider, ILocalStorageService localStorage, ApiService apiService)
+    public RefreshTokenService(HttpClient httpClient, AuthenticationStateProvider authStateProvider, ILocalStorageService localStorage)
     {
+        _httpClient = httpClient;
         _authStateProvider = authStateProvider;
         _localStorage = localStorage;
-        _apiService = apiService;
     }
 
-    public async Task TryRefreshToken()
+    public async Task<bool> TryRefreshToken()
     {
-        var authState = await _authStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        if (user.Identity.IsAuthenticated)
+        try
         {
-            var exp = user.FindFirst(c => c.Type.Equals("exp")).Value;
-            var expTime = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(exp));
-            var timeUTC = DateTime.UtcNow;
-            var diff = expTime - timeUTC;
-            if (diff.TotalMinutes <= 1)
-            {
-                await RefreshToken();
-            }
-        }
-    }
+            var accessToken = await _localStorage.GetItemAsync<string>("accessToken");
+            var refreshTokenRequest = new RefreshTokenRequest() { AccessToken = accessToken };
+            var httpResponse = await _httpClient.PostAsJsonAsync("auth/refresh-token", refreshTokenRequest);
 
-    private async Task RefreshToken()
-    {
-        var accessToken = await _localStorage.GetItemAsync<string>("accessToken");
-        var refreshTokenRequest = new RefreshTokenRequest() { AccessToken = accessToken };
-        var tokenResponse = await _apiService.Post<RefreshTokenRequest, TokenResponse>("auth/refresh-token", refreshTokenRequest);
-        await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
-        ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
+            if (!httpResponse.IsSuccessStatusCode)
+                return false;
+
+            var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
+            await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
+            ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
