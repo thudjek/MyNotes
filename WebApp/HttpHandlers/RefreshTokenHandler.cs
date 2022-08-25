@@ -1,11 +1,8 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using SharedModels.Requests.Auth;
-using SharedModels.Responses.Auth;
 using System.Net;
 using System.Net.Http.Headers;
-using WebApp.Auth;
 using WebApp.Services;
 
 namespace WebApp.HttpHandlers;
