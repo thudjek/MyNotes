@@ -1,0 +1,20 @@
+﻿<button disabled=@isDisabled class="btn btn-primary w-100" type="submit">@ChildContent</button>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool isDisabled = false;
+
+    public void Enable()
+    {
+        if (isDisabled)
+            isDisabled = false;
+    }
+
+    public void Disable()
+    {
+        if (!isDisabled)
+            isDisabled = true;
+    }
+}

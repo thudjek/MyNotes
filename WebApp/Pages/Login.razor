@@ -26,7 +26,7 @@
     </div>
     <div class="row">
         <div class="col-8 offset-2 col-md-6 offset-md-3 col-lg-5 offset-lg-3point5 col-xl-4 offset-xl-4 mb-3">
-            <button class="btn btn-primary w-100" type="submit">Log in</button>
+            <SubmitButton @ref="submitButton">Log in</SubmitButton>
         </div>
     </div>
 </EditForm>
@@ -51,11 +51,13 @@
 @code {
     private LoginRequest loginRequest = new ();
     private CustomValidator customValidator;
+    private SubmitButton submitButton;
 
     private async Task SubmitLogin()
     {
         try
         {
+            submitButton.Disable();
             var tokenResponse = await _apiService.Post<LoginRequest, TokenResponse>("auth/login", loginRequest);
             await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
             ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
@@ -63,11 +65,13 @@
         }
         catch (ValidationException ex)
         {
+            submitButton.Enable();
             customValidator.ClearErrors();
             customValidator.DisplayErrors(ex.ErrorsGrouped);
         }
         catch (ApplicationException ex)
         {
+            submitButton.Enable();
             _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
         }
     }
