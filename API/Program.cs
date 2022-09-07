@@ -10,7 +10,6 @@ using Application.Common.Interfaces;
 using API.Services;
 using Infrastructure.Data;
 using CookieSameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
-using Microsoft.Net.Http.Headers;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()

@@ -1,55 +1,57 @@
 ﻿@page "/"
 @using SharedModels.Responses.Notes
 @using WebApp.Components.Dropdown
+@using WebApp.Components.Sidebar
 @attribute [Authorize]
 @inject PopupMessageService _popupMessageService
 @inject ILocalStorageService _localStorage
 @inject RefreshTokenService _refreshTokenService
 @inject ApiService _apiService
 
-<div class="sidebar"> 
-    <div class="sidebar-header">
-        <Dropdown>
-            <DropdownToggleText Id="dropdownToggleText">thudjek@gmail.com <i class="bi bi-caret-down font-14"></i></DropdownToggleText>
-            <DropdownMenu>
-                <DropdownItem Href="logout">Logout</DropdownItem>
-            </DropdownMenu>
-        </Dropdown>
-    </div>
-    <div class="sidebar-item">
-        <SearchBar SearchChangedCallback="GetNotes" />
-    </div>
-</div>
-<div class="d-inline-block">
-    @if (notes != null && notes.Count > 0)
-    {
-        <ul>
-            @foreach(var note in notes)
-            {
-                <li>Title: @note.Title, Content: @note.Content</li>
-            }
-        </ul>    
-    }
-</div>
+<Sidebar ActiveItemName="notesNavItem" SearchbarCallback="FilterNotes" Notes="outputNotes" />
+
+@*rich textbox*@
 
 @code {
-    private List<NoteResponse> notes = null;
+    private List<NoteResponse> allNotes = null;
+    private List<NoteResponse> outputNotes = null;
 
     protected override async Task OnInitializedAsync()
     {
         await GetNotes();
     }
 
-    private async Task GetNotes(string filter = "")
+    private async Task GetNotes()
     {
         try
         {
-            var queryString = !string.IsNullOrWhiteSpace(filter) ? "?filter=" + filter : "";
-            notes = await _apiService.Get<List<NoteResponse>>("notes", queryString); 
+            allNotes = await _apiService.Get<List<NoteResponse>>("notes");
+            outputNotes = allNotes;
         }
         catch (ApplicationException ex)
         {
             _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+
+    private async Task GetTrash()
+    {
+        try
+        {
+            allNotes = await _apiService.Get<List<NoteResponse>>("notes/trash");
+            outputNotes = allNotes;
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+
+    private void FilterNotes(string filter)
+    {
+        if (allNotes != null && allNotes.Count > 0)
+        {
+            outputNotes = allNotes.Where(n => n.Title.ToLower().Contains(filter.ToLower()) || n.Content.ToLower().Contains(filter.ToLower())).ToList();
         }
     }
 }

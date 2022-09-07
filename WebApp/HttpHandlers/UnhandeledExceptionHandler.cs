@@ -12,7 +12,7 @@ public class UnhandeledExceptionHandler : DelegatingHandler
         }
         catch
         {
-            throw new ApplicationException(new ErrorModel().Error); //logging maybe?
+            throw new ApplicationException(new ErrorModel().Error);
         }
     }
 }

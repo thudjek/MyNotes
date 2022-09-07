@@ -1,0 +1,55 @@
+﻿@using WebApp.Components.Dropdown
+@using SharedModels.Responses.Notes
+
+ <CascadingValue Value="ActiveItemName">
+    <div class="sidebar"> 
+        <div class="sidebar-header">
+            <Dropdown>
+                <DropdownToggleText Id="dropdownToggleText">thudjek@gmail.com <i class="bi bi-caret-down font-14"></i></DropdownToggleText>
+                <DropdownMenu>
+                    <DropdownItem Href="logout">Logout</DropdownItem>
+                </DropdownMenu>
+            </Dropdown>
+        </div>
+        <div class="sidebar-item">
+            <SearchBar SearchChangedCallback="SearchbarCallback" />
+        </div>
+        <SidebarNavItem Name="notesNavItem">
+            <i class="bi bi-journal-text"></i>&nbsp; Notes
+        </SidebarNavItem>
+        <SidebarNavItem Name="trashNavItem">
+            <i class="bi bi-trash"></i>&nbsp; Trash
+        </SidebarNavItem>
+        <hr />
+        @if (Notes != null && Notes.Count > 0)
+        {
+            <div class="notes-container">
+                @foreach(var note in Notes)
+                {
+                    <div class="card note-card @(note != Notes.Last() ? "mb-1": "")">
+                        <div class="card-body">
+                            <h5 class="card-title">@note.Title</h5>
+                            <p class="card-text">@note.Content</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center">No notes to display</div>
+        }
+    </div>
+ </CascadingValue>
+
+
+@code {
+    [Parameter]
+    public string ActiveItemName { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SearchbarCallback { get; set; }
+
+    [Parameter]
+    public List<NoteResponse> Notes { get; set; }
+}

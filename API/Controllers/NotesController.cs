@@ -21,9 +21,9 @@ public class NotesController : ApiBaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetNoteList([FromQuery] string filter)
+    public async Task<IActionResult> GetNoteList()
     {
-        //var noteResponseList = await Mediator.Send(new GetNoteListQuery() { Filter = filter });
+        //var noteResponseList = await Mediator.Send(new GetNoteListQuery());
         //if (noteResponseList == null)
         //    return Ok();
 
@@ -32,8 +32,22 @@ public class NotesController : ApiBaseController
         noteResponseList.Add(new SharedModels.Responses.Notes.NoteResponse() { Title = "Tasks", Content = "prvi, drugi" });
         noteResponseList.Add(new SharedModels.Responses.Notes.NoteResponse() { Title = "Nekaj", Content = "ocu i necu" });
 
-        if (!string.IsNullOrWhiteSpace(filter))
-            noteResponseList = noteResponseList.Where(n => n.Title.ToLower().Contains(filter.ToLower()) || n.Content.ToLower().Contains(filter.ToLower())).ToList();
+        await Task.CompletedTask;
+
+        return Ok(noteResponseList);
+    }
+
+    [HttpGet("trash")]
+    public async Task<IActionResult> GetTrashNoteList()
+    {
+        //var noteResponseList = await Mediator.Send(new GetNoteListQuery());
+        //if (noteResponseList == null)
+        //    return Ok();
+
+        var noteResponseList = new List<SharedModels.Responses.Notes.NoteResponse>();
+        noteResponseList.Add(new SharedModels.Responses.Notes.NoteResponse() { Title = "Za kupiti izbrisano", Content = "kruske, jabuke, sljive, banane" });
+        noteResponseList.Add(new SharedModels.Responses.Notes.NoteResponse() { Title = "Tasks 222", Content = "prvi, drugi, treci, cetvrti" });
+        noteResponseList.Add(new SharedModels.Responses.Notes.NoteResponse() { Title = "Nekaj 223", Content = "ocu i necu i mozda" });
 
         await Task.CompletedTask;
 

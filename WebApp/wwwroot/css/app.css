@@ -201,7 +201,25 @@ h1:focus {
 }
 
 .sidebar-item {
-    padding: 15px;
+    padding: 15px 15px 15px 15px;
+}
+
+.sidebar-nav-item {
+    padding: 10px 15px 10px 15px;
+    color: #bebebe;
+}
+
+.sidebar-nav-item.active {
+    background-color: #2b2828;
+}
+
+.sidebar-nav-item:hover {
+    background-color: #312e2e;
+    cursor: pointer;
+}
+
+.sidebar-nav-item.active:hover {
+    background-color: #2b2828;
 }
 
 .font-14 {
@@ -277,4 +295,40 @@ h1:focus {
     background: none;
     border: none;
     outline: none;
+}
+
+.notes-container {
+    height: 70%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: #ac741d #7c6969;
+}
+
+.notes-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.notes-container::-webkit-scrollbar-track {
+    background-color: #7c6969;
+}
+
+.notes-container::-webkit-scrollbar-thumb {
+    background-color: #ac741d;
+    border: 1px solid black;
+}
+
+.notes-container::-webkit-scrollbar-thumb:hover {
+    background-color: #7c5314;
+}
+
+.note-card {
+    background-color: #2e2d2d;
+    color: #cac7c7;
+}
+
+.note-card:hover {
+    background-color: #1e1d1d;
+    cursor: pointer;
 }

@@ -1,0 +1,21 @@
+﻿<div class="sidebar-nav-item @(isActive ? "active" : "")">
+    @ChildContent
+</div>
+
+@code {
+    [CascadingParameter]
+    public string ActiveItemName { get; set; }
+
+    [Parameter]
+    public string Name { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool isActive = false;
+
+    protected override void OnParametersSet()
+    {
+        isActive = ActiveItemName == Name;
+    }
+}

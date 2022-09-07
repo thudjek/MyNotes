@@ -5,4 +5,5 @@ public class NoteResponse
     public string Title { get; set; }
     public string Content { get; set; }
     public bool Owned { get; set; }
+    public bool IsDeleted { get; set; }
 }
