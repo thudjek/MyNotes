@@ -1,10 +1,13 @@
-﻿<div class="sidebar-nav-item @(isActive ? "active" : "")">
+﻿<div class="sidebar-nav-item @(isActive ? "active" : "")" @onclick="OnClickHandler">
     @ChildContent
 </div>
 
 @code {
     [CascadingParameter]
-    public string ActiveItemName { get; set; }
+    public string CurrentActiveNavItem { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnClickCallback { get; set; }
 
     [Parameter]
     public string Name { get; set; }
@@ -16,6 +19,12 @@
 
     protected override void OnParametersSet()
     {
-        isActive = ActiveItemName == Name;
+        isActive = CurrentActiveNavItem == Name;
+    }
+
+    private async Task OnClickHandler()
+    {
+        if(!isActive)
+            await OnClickCallback.InvokeAsync(Name);
     }
 }

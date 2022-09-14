@@ -8,50 +8,27 @@
 @inject RefreshTokenService _refreshTokenService
 @inject ApiService _apiService
 
-<Sidebar ActiveItemName="notesNavItem" SearchbarCallback="FilterNotes" Notes="outputNotes" />
+<Sidebar DefaultActiveNavItem="notesNavItem" AllNotes="allNotes" />
 
 @*rich textbox*@
 
 @code {
     private List<NoteResponse> allNotes = null;
-    private List<NoteResponse> outputNotes = null;
 
     protected override async Task OnInitializedAsync()
     {
-        await GetNotes();
+        await GetAllNotes();
     }
 
-    private async Task GetNotes()
+    private async Task GetAllNotes()
     {
         try
         {
             allNotes = await _apiService.Get<List<NoteResponse>>("notes");
-            outputNotes = allNotes;
         }
         catch (ApplicationException ex)
         {
             _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
-        }
-    }
-
-    private async Task GetTrash()
-    {
-        try
-        {
-            allNotes = await _apiService.Get<List<NoteResponse>>("notes/trash");
-            outputNotes = allNotes;
-        }
-        catch (ApplicationException ex)
-        {
-            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
-        }
-    }
-
-    private void FilterNotes(string filter)
-    {
-        if (allNotes != null && allNotes.Count > 0)
-        {
-            outputNotes = allNotes.Where(n => n.Title.ToLower().Contains(filter.ToLower()) || n.Content.ToLower().Contains(filter.ToLower())).ToList();
         }
     }
 }

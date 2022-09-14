@@ -1,7 +1,7 @@
 ﻿@using WebApp.Components.Dropdown
 @using SharedModels.Responses.Notes
 
- <CascadingValue Value="ActiveItemName">
+ <CascadingValue Value="CurrentActiveNavItem">
     <div class="sidebar"> 
         <div class="sidebar-header">
             <Dropdown>
@@ -12,21 +12,21 @@
             </Dropdown>
         </div>
         <div class="sidebar-item">
-            <SearchBar SearchChangedCallback="SearchbarCallback" />
+            <SearchBar @ref="searchBar" SearchChangedCallback="FilterNotes" />
         </div>
-        <SidebarNavItem Name="notesNavItem">
+        <SidebarNavItem Name="notesNavItem" OnClickCallback="OnNavItemClickHandler">
             <i class="bi bi-journal-text"></i>&nbsp; Notes
         </SidebarNavItem>
-        <SidebarNavItem Name="trashNavItem">
+        <SidebarNavItem Name="trashNavItem" OnClickCallback="OnNavItemClickHandler">
             <i class="bi bi-trash"></i>&nbsp; Trash
         </SidebarNavItem>
         <hr />
-        @if (Notes != null && Notes.Count > 0)
+        @if (outputNotes != null && outputNotes.Count > 0)
         {
             <div class="notes-container">
-                @foreach(var note in Notes)
+                @foreach(var note in outputNotes)
                 {
-                    <div class="card note-card @(note != Notes.Last() ? "mb-1": "")">
+                    <div class="card note-card @(note != outputNotes.Last() ? "mb-1": "")">
                         <div class="card-body">
                             <h5 class="card-title">@note.Title</h5>
                             <p class="card-text">@note.Content</p>
@@ -45,11 +45,46 @@
 
 @code {
     [Parameter]
-    public string ActiveItemName { get; set; }
+    public string DefaultActiveNavItem { get; set; }
+
+    public string CurrentActiveNavItem { get; private set; }
 
     [Parameter]
-    public EventCallback<string> SearchbarCallback { get; set; }
+    public List<NoteResponse> AllNotes { get; set; }
 
-    [Parameter]
-    public List<NoteResponse> Notes { get; set; }
+    private List<NoteResponse> currentSetOfNotes;
+    private List<NoteResponse> outputNotes;
+
+    private SearchBar searchBar;
+
+    protected override void OnParametersSet()
+    {
+        CurrentActiveNavItem = DefaultActiveNavItem;
+        SetCurrentNotes(false);
+    }
+
+    private async Task OnNavItemClickHandler(string activeItemName)
+    {
+        await searchBar.ClearInput(false);
+        CurrentActiveNavItem = activeItemName;
+        SetCurrentNotes(CurrentActiveNavItem == "trashNavItem");
+    }
+
+    private void SetCurrentNotes(bool isTrash)
+    {
+        currentSetOfNotes = AllNotes?
+            .Where(n => n.IsDeleted == isTrash)
+            .OrderByDescending(n => n.Date)
+            .ToList();
+
+        outputNotes = currentSetOfNotes;
+    }
+
+    private void FilterNotes(string filter)
+    {
+        if (currentSetOfNotes != null && currentSetOfNotes.Count > 0)
+        {
+            outputNotes = currentSetOfNotes.Where(n => n.Title.ToLower().Contains(filter.ToLower()) || n.Content.ToLower().Contains(filter.ToLower())).ToList();
+        }
+    }
 }
