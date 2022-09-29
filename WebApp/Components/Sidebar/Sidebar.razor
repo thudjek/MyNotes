@@ -1,5 +1,7 @@
 ﻿@using WebApp.Components.Dropdown
 @using SharedModels.Responses.Notes
+@inject ApiService _apiService
+@inject PopupMessageService _popupMessageService
 
  <CascadingValue Value="CurrentActiveNavItem">
     <div class="sidebar"> 
@@ -20,6 +22,12 @@
         <SidebarNavItem Name="trashNavItem" OnClickCallback="OnNavItemClickHandler">
             <i class="bi bi-trash"></i>&nbsp; Trash
         </SidebarNavItem>
+        @if (CurrentActiveNavItem == "notesNavItem")
+        {
+            <div class="sidebar-item text-center">
+                <button class="new-note-btn" @onclick="CreateNewNote">New note</button>
+            </div>
+        }
         <hr />
         @if (outputNotes != null && outputNotes.Count > 0)
         {
@@ -37,7 +45,14 @@
         }
         else
         {
-            <div class="text-center">No notes to display</div>
+            if (CurrentActiveNavItem == "notesNavItem")
+            {
+                <div class="text-center">No notes to display</div>
+            }
+            else
+            {
+                <div class="text-center">Trash is empty</div>
+            }
         }
     </div>
  </CascadingValue>
@@ -49,13 +64,16 @@
 
     public string CurrentActiveNavItem { get; private set; }
 
-    [Parameter]
-    public List<NoteResponse> AllNotes { get; set; }
-
+    private List<NoteResponse> AllNotes;
     private List<NoteResponse> currentSetOfNotes;
     private List<NoteResponse> outputNotes;
 
     private SearchBar searchBar;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllNotes();
+    }
 
     protected override void OnParametersSet()
     {
@@ -85,6 +103,32 @@
         if (currentSetOfNotes != null && currentSetOfNotes.Count > 0)
         {
             outputNotes = currentSetOfNotes.Where(n => n.Title.ToLower().Contains(filter.ToLower()) || n.Content.ToLower().Contains(filter.ToLower())).ToList();
+        }
+    }
+
+    private async Task CreateNewNote()
+    {
+        try
+        {
+            await _apiService.Post("notes");
+            await GetAllNotes();
+            SetCurrentNotes(false);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+
+    private async Task GetAllNotes()
+    {
+        try
+        {
+            AllNotes = await _apiService.Get<List<NoteResponse>>("notes");
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
         }
     }
 }

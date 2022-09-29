@@ -3,32 +3,14 @@
 @using WebApp.Components.Dropdown
 @using WebApp.Components.Sidebar
 @attribute [Authorize]
-@inject PopupMessageService _popupMessageService
-@inject ILocalStorageService _localStorage
-@inject RefreshTokenService _refreshTokenService
-@inject ApiService _apiService
 
-<Sidebar DefaultActiveNavItem="notesNavItem" AllNotes="allNotes" />
-
-@*rich textbox*@
-
-@code {
-    private List<NoteResponse> allNotes = null;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await GetAllNotes();
-    }
-
-    private async Task GetAllNotes()
-    {
-        try
-        {
-            allNotes = await _apiService.Get<List<NoteResponse>>("notes");
-        }
-        catch (ApplicationException ex)
-        {
-            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
-        }
-    }
-}
+<div class="main-row">
+    <div class="sidebar-col">
+        <Sidebar DefaultActiveNavItem="notesNavItem" />
+    </div>
+    <div class="content-col">
+        <div class="main-content">
+            <RichTextEditor />
+        </div>
+    </div>
+</div>

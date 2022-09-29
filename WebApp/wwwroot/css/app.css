@@ -191,7 +191,7 @@ h1:focus {
     display: inline-block;
     background-color: #3c3636;
     height: 100vh;
-    width: 320px;
+    width: 100%;
 }
 
 .sidebar-header {
@@ -331,4 +331,62 @@ h1:focus {
 .note-card:hover {
     background-color: #1e1d1d;
     cursor: pointer;
+}
+
+.main-content {
+    height: 100%;
+    padding: 10px 20px 10px 20px;
+}
+
+.main-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sidebar-col {
+    flex: 0 0 auto;
+    width: 340px;
+}
+
+.content-col {
+    flex: 0 0 auto;
+    width: calc(100% - 340px);
+}
+
+.editor {
+    height: calc(100% - 120px) !important;
+    font-size: 16px !important;
+    color: #f2f2f2 !important;
+}
+
+.title {
+    background-color: #414141;
+    border: 1px solid white;
+    width: 100%;
+    height: 40px;
+    margin-bottom: 20px;
+    margin-top: 5px;
+    padding: 5px 20px 5px 20px;
+    color: #f2f2f2;
+    font-size: 16px;
+}
+
+.title:focus {
+    outline: none;
+}
+
+.new-note-btn {
+    background-color: #cacaca;
+    width: 100%;
+    border-radius: 25rem;
+    font-weight: bold;
+    border: none;
+}
+
+.new-note-btn:hover {
+    background-color: #b5b4b4;
+}
+
+.new-note-btn:active {
+    background-color: #9d9d9d;
 }

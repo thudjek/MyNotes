@@ -1,0 +1,13 @@
+﻿@inject IJSRuntime _jsRuntime;
+
+<div><input class="title" type="text" placeholder="Title"/></div>
+<div id="editor" class="editor"></div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+            await _jsRuntime.InvokeVoidAsync("initRichTextEditor");
+    }
+
+}

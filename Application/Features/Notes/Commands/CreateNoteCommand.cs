@@ -3,13 +3,11 @@ using MediatR;
 using Domain.Entities;
 
 namespace Application.Features.Notes.Commands;
-public class CreateNoteCommand : IRequest<int>
+public class CreateNoteCommand : IRequest
 {
-    public string Title { get; set; }
-    public string Content { get; set; }
 }
 
-public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand, int>
+public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand>
 {
     private readonly IAppDbContext _dbContext;
     public CreateNoteCommandHandler(IAppDbContext dbContext)
@@ -17,18 +15,18 @@ public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand, int>
         _dbContext = dbContext;
     }
 
-    public async Task<int> Handle(CreateNoteCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle(CreateNoteCommand request, CancellationToken cancellationToken)
     {
         var note = new Note()
         {
-            Title = request.Title ?? string.Empty,
-            Content = request.Content ?? string.Empty
+            Title = "My note",
+            Content = string.Empty
         };
 
         _dbContext.Notes.Add(note);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return note.Id;
+        return Unit.Value;
     }
 }

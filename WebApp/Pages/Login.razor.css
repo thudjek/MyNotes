@@ -9,15 +9,15 @@
     justify-content: center;
 }
 
-    .google-login-btn:hover {
-        border: 1.5px solid #0096f8;
-    }
+.google-login-btn:hover {
+    border: 1.5px solid #0096f8;
+}
 
-    .google-login-btn img {
-        margin-right: auto;
-        height: 1.5rem;
-    }
+.google-login-btn img {
+    margin-right: auto;
+    height: 1.5rem;
+}
 
-    .google-login-btn span {
-        margin-right: auto;
-    }
+.google-login-btn span {
+    margin-right: auto;
+}
