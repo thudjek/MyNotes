@@ -4,27 +4,42 @@
 
 @code {
     [CascadingParameter]
-    public string CurrentActiveNavItem { get; set; }
+    public Sidebar ParentSidebar { get; set; }
 
     [Parameter]
-    public EventCallback<string> OnClickCallback { get; set; }
+    public EventCallback<NavItemType> OnClickCallback { get; set; }
 
     [Parameter]
-    public string Name { get; set; }
+    public bool IsDefaultActive { get; set; }
+
+    [Parameter]
+    public NavItemType Type { get; set; }
 
     [Parameter]
     public RenderFragment ChildContent { get; set; }
 
     private bool isActive = false;
 
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
-        isActive = CurrentActiveNavItem == Name;
+        ParentSidebar.AddNavItem(this);
+        if (IsDefaultActive)
+            isActive = true;
+    }
+
+    public void Activate()
+    {
+        isActive = true;
+    }
+
+    public void Deactivate()
+    {
+        isActive = false;
     }
 
     private async Task OnClickHandler()
     {
         if(!isActive)
-            await OnClickCallback.InvokeAsync(Name);
+            await OnClickCallback.InvokeAsync(Type);
     }
 }

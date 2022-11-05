@@ -1,0 +1,61 @@
+﻿@using SharedModels.Responses.Notes
+
+@if (Notes != null && Notes.Count > 0)
+{
+    <div class="notes-container">
+        @foreach (var note in Notes)
+        {
+            <div @onclick="() => SetActiveNote(note)" class="card note-card @(GetCssActiveClass(note)) @(GetCssMarginClass(note))">
+                <div class="card-body">
+                    <h5 class="card-title">@note.Title</h5>
+                    <p class="card-text truncate">@note.Content</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    if (ActiveNavItemType == NavItemType.Notes)
+    {
+        <div class="text-center">No notes to display</div>
+    }
+    else
+    {
+        <div class="text-center">Trash is empty</div>
+    }
+}
+
+@code {
+    [Parameter]
+    public List<NoteResponse> Notes { get; set; }
+
+    [Parameter]
+    public NavItemType ActiveNavItemType { get; set; }
+
+    [CascadingParameter]
+    public CascadingAppState AppState { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Notes != null && Notes.Count > 0)
+        {
+            SetActiveNote(Notes.First());
+        }
+    }
+
+    private void SetActiveNote(NoteResponse note)
+    {
+        AppState.SetActiveNote(note);
+    }
+
+    private string GetCssMarginClass(NoteResponse note)
+    {
+        return note != Notes.Last() ? "mb-1" : "";
+    }
+
+    private string GetCssActiveClass(NoteResponse note)
+    {
+        return AppState.ActiveNote != null && AppState.ActiveNote.Id == note.Id ? "active" : "";
+    }
+}

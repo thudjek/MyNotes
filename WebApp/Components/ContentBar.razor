@@ -1,0 +1,42 @@
+﻿@implements IDisposable
+@inject ApiService _apiService
+
+<div class="content-bar">
+    @if (AppState != null && AppState.ActiveNote != null)
+    {
+        if (AppState.ActiveNote.IsDeleted)
+        {
+            <div class="content-bar-item">Empty trash</div>
+            <div class="content-bar-item">Restore</div>
+        }
+        else
+        {
+            <div class="content-bar-item">Save</div>
+            <div class="content-bar-item">Delete</div>
+        }
+    }
+    else
+    {
+        <div class="container-bar-item">&nbsp;</div>
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    public CascadingAppState AppState { get; set; }
+
+    protected override void OnInitialized()
+    {
+        AppState.ActiveNoteChanged += OnActiveNoteChanged;
+    }
+
+    private void OnActiveNoteChanged()
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        AppState.ActiveNoteChanged -= OnActiveNoteChanged;
+    }
+}

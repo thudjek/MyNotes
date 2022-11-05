@@ -4,13 +4,16 @@
 @using WebApp.Components.Sidebar
 @attribute [Authorize]
 
-<div class="main-row">
-    <div class="sidebar-col">
-        <Sidebar DefaultActiveNavItem="notesNavItem" />
-    </div>
-    <div class="content-col">
-        <div class="main-content">
-            <RichTextEditor />
+<CascadingAppState>
+    <div class="main-row">
+        <div class="sidebar-col">
+            <Sidebar />
+        </div>
+        <div class="content-col">
+            <div class="content-container">
+                <ContentBar />
+                <div class="editor-test">YXC</div>
+            </div>
         </div>
     </div>
-</div>
+</CascadingAppState>
