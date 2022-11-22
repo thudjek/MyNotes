@@ -6,8 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Identity\Events\**" />
     <Compile Remove="Models\**" />
+    <EmbeddedResource Remove="Identity\Events\**" />
     <EmbeddedResource Remove="Models\**" />
+    <None Remove="Identity\Events\**" />
     <None Remove="Models\**" />
   </ItemGroup>
 
@@ -30,7 +33,6 @@
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
     <Folder Include="Db\VolumeData\" />
-    <Folder Include="Identity\Events\" />
   </ItemGroup>
 
 </Project>
