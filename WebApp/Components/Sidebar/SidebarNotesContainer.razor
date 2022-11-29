@@ -33,20 +33,15 @@ else
     [Parameter]
     public NavItemType ActiveNavItemType { get; set; }
 
+    [Parameter]
+    public EventCallback<NoteResponse> SetActiveNoteCallback { get; set; }
+
     [CascadingParameter]
-    public CascadingAppState AppState { get; set; }
+    public NoteResponse ActiveNote { get; set; }
 
-    protected override void OnParametersSet()
+    private async Task SetActiveNote(NoteResponse note)
     {
-        if (Notes != null && Notes.Count > 0)
-        {
-            SetActiveNote(Notes.First());
-        }
-    }
-
-    private void SetActiveNote(NoteResponse note)
-    {
-        AppState.SetActiveNote(note);
+        await SetActiveNoteCallback.InvokeAsync(note);
     }
 
     private string GetCssMarginClass(NoteResponse note)
@@ -56,6 +51,6 @@ else
 
     private string GetCssActiveClass(NoteResponse note)
     {
-        return AppState.ActiveNote != null && AppState.ActiveNote.Id == note.Id ? "active" : "";
+        return ActiveNote != null && ActiveNote.Id == note.Id ? "active" : "";
     }
 }

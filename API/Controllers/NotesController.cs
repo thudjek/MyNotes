@@ -27,18 +27,6 @@ public class NotesController : ApiBaseController
         if (noteResponseList == null)
             return Ok();
 
-        //var noteResponseList = new List<SharedModels.Responses.Notes.NoteResponse>
-        //{
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Za kupiti", Content = "kruske, jabuke, sljive", Date = new DateTime(2022, 2, 5) },
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Tasks", Content = "prvi, drugi", Date = new DateTime(2022, 2, 3) },
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Nekaj", Content = "ocu i necu", Date = new DateTime(2022, 2, 8) },
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Za kupiti izbrisano", Content = "kruske, jabuke, sljive, banane", IsDeleted = true, Date = new DateTime(2022, 2, 1) },
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Tasks 222", Content = "prvi, drugi, treci, cetvrti", IsDeleted = true, Date = new DateTime(2022, 2, 16) },
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Nekaj 223", Content = "ocu i necu i mozda", IsDeleted = true, Date = new DateTime(2022, 2, 10) }
-        //};
-
-        //await Task.CompletedTask;
-
         return Ok(noteResponseList);
     }
 
@@ -48,15 +36,6 @@ public class NotesController : ApiBaseController
         var noteResponseList = await Mediator.Send(new GetNoteListQuery());
         if (noteResponseList == null)
             return Ok();
-
-        //var noteResponseList = new List<SharedModels.Responses.Notes.NoteResponse>
-        //{
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Za kupiti izbrisano", Content = "kruske, jabuke, sljive, banane" },
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Tasks 222", Content = "prvi, drugi, treci, cetvrti" },
-        //    new SharedModels.Responses.Notes.NoteResponse() { Title = "Nekaj 223", Content = "ocu i necu i mozda" }
-        //};
-
-        //await Task.CompletedTask;
 
         return Ok(noteResponseList);
     }

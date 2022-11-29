@@ -6,22 +6,31 @@
 @inject PopupMessageService _popupMessageService
 @attribute [Authorize]
 
-<CascadingAppState>
+<CascadingValue Value="activeNote">
     <div class="main-row">
         <div class="sidebar-col">
-            <Sidebar />
+            <Sidebar Notes="currentNotes" GetCurrentNotesCallback="GetCurrentNotes"  CreateNoteCallback="CreateNewNote" SetActiveNoteCallback="SetActiveNote" />
         </div>
         <div class="content-col">
             <div class="content-container">
-                <ContentBar />
-                <div class="editor-test">YXC</div>
+                <ContentBar DeleteNoteCallback="DeleteNote" RestoreNoteCallback="RestoreNote" EmptyTrashCallback="EmptyTrash" />
+                <TestEditor />
             </div>
         </div>
     </div>
-</CascadingAppState>
+</CascadingValue>
 
 @code {
     List<NoteResponse> allNotes;
+    List<NoteResponse> currentNotes;
+    NoteResponse activeNote;
+    string filter;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllNotes();
+        GetCurrentNotes(false);
+    }
 
     private async Task GetAllNotes()
     {
@@ -33,5 +42,86 @@
         {
             _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
         }
+    }
+
+    private void GetCurrentNotes(GetCurrentNotesArgs args)
+    {
+        filter = args.Filter;
+        GetCurrentNotes(args.IsTrash, args.Filter);
+    } 
+
+    private void GetCurrentNotes(bool isTrash, string filter = "")
+    {
+        if (allNotes != null && allNotes.Count > 0)
+        {
+            var query = allNotes.Where(n => n.IsDeleted == isTrash);
+
+            if (!string.IsNullOrWhiteSpace(filter))
+                query = query.Where(n => n.Title.ToLower().Contains(filter.ToLower()) || n.Content.ToLower().Contains(filter.ToLower()));
+
+            currentNotes = query.OrderByDescending(n => n.Date).ToList();
+            activeNote = currentNotes.FirstOrDefault();
+        }
+    }
+
+    private async Task CreateNewNote()
+    {
+        try
+        {
+            await _apiService.Post("notes");
+            await GetAllNotes();
+            GetCurrentNotes(false, filter);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+
+    private async Task DeleteNote()
+    {
+        try
+        {
+            await _apiService.Post($"notes/delete/{activeNote.Id}");
+            await GetAllNotes();
+            GetCurrentNotes(false, filter);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+
+    private async Task RestoreNote()
+    {
+        try
+        {
+            await _apiService.Post($"notes/restore/{activeNote.Id}");
+            await GetAllNotes();
+            GetCurrentNotes(true, filter);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+
+    private async Task EmptyTrash()
+    {
+        try
+        {
+            await _apiService.Post("notes/empty-trash");
+            await GetAllNotes();
+            GetCurrentNotes(true, filter);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+
+    private void SetActiveNote(NoteResponse note)
+    {
+        activeNote = note;
     }
 }

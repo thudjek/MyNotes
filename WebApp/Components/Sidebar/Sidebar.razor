@@ -8,7 +8,7 @@
         <div class="sidebar-header">
             @if (activeNavItemType == NavItemType.Notes)
             {
-                <div @onclick="CreateNewNote" class="new-note-btn"><i class="bi bi-pencil-square"></i></div>
+                <div @onclick="() => CreateNoteCallback.InvokeAsync()" class="new-note-btn"><i class="bi bi-pencil-square"></i></div>
             }
             <Dropdown>
                 <DropdownToggleText Id="dropdownToggleText">thudjek@gmail.com <i class="bi bi-caret-down font-14"></i></DropdownToggleText>
@@ -18,38 +18,41 @@
             </Dropdown>
         </div>
         <div class="sidebar-item">
-            <SearchBar @ref="searchBar" SearchChangedCallback="FilterNotes" />
+            <SearchBar @ref="searchBar" FilterNotesCallback="FilterNotes" />
         </div>
-        <SidebarNavItem Type="NavItemType.Notes" IsDefaultActive=true OnClickCallback="OnNavItemClickHandler">
+        <SidebarNavItem Type="NavItemType.Notes" IsDefaultActive=true OnClickCallback="NavItemClickHandler">
             <i class="bi bi-journal-text"></i>&nbsp; Notes
         </SidebarNavItem>
-        <SidebarNavItem Type="NavItemType.Trash" OnClickCallback="OnNavItemClickHandler">
+        <SidebarNavItem Type="NavItemType.Trash" OnClickCallback="NavItemClickHandler">
             <i class="bi bi-trash"></i>&nbsp; Trash
         </SidebarNavItem>
         <hr />
-        <SidebarNotesContainer Notes="outputNotes" ActiveNavItemType="activeNavItemType" />
+        <SidebarNotesContainer Notes="Notes" ActiveNavItemType="activeNavItemType" SetActiveNoteCallback="(note) => SetActiveNoteCallback.InvokeAsync(note)" />
     </div>
  </CascadingValue>
 
 
 @code {
-    List<NoteResponse> AllNotes;
-    List<NoteResponse> currentSetOfNotes;
-    List<NoteResponse> outputNotes;
     SearchBar searchBar;
     List<SidebarNavItem> navItems;
     NavItemType activeNavItemType;
 
-    protected override async Task OnInitializedAsync()
+    [Parameter]
+    public List<NoteResponse> Notes { get; set; }
+
+    [Parameter]
+    public EventCallback<GetCurrentNotesArgs> GetCurrentNotesCallback { get; set; }
+
+    [Parameter]
+    public EventCallback CreateNoteCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<NoteResponse> SetActiveNoteCallback { get; set; }
+
+    protected override void OnInitialized()
     {
         navItems = new();
         activeNavItemType = NavItemType.Notes;
-        await GetAllNotes();
-    }
-
-    protected override void OnParametersSet()
-    {
-        SetCurrentNotes(false);
     }
 
     public void AddNavItem(SidebarNavItem navItem)
@@ -57,11 +60,10 @@
         navItems.Add(navItem);
     }
 
-    private async Task OnNavItemClickHandler(NavItemType navItemType)
+    private async Task NavItemClickHandler(NavItemType navItemType)
     {
         SetActiveNavItem(navItemType);
-        await searchBar.ClearInput(false);
-        SetCurrentNotes(navItemType == NavItemType.Trash);
+        await searchBar.ClearInput();
     }
 
     private void SetActiveNavItem(NavItemType navItemType)
@@ -77,47 +79,8 @@
         activeNavItemType = navItemType;
     }
 
-    private void SetCurrentNotes(bool isTrash)
+    private async Task FilterNotes(string filter)
     {
-        currentSetOfNotes = AllNotes?
-            .Where(n => n.IsDeleted == isTrash)
-            .OrderByDescending(n => n.Date)
-            .ToList();
-
-        outputNotes = currentSetOfNotes;
-    }
-
-    private void FilterNotes(string filter)
-    {
-        if (currentSetOfNotes != null && currentSetOfNotes.Count > 0)
-        {
-            outputNotes = currentSetOfNotes.Where(n => n.Title.ToLower().Contains(filter.ToLower()) || n.Content.ToLower().Contains(filter.ToLower())).ToList();
-        }
-    }
-
-    private async Task CreateNewNote()
-    {
-        try
-        {
-            await _apiService.Post("notes");
-            await GetAllNotes();
-            SetCurrentNotes(false);
-        }
-        catch (ApplicationException ex)
-        {
-            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
-        }
-    }
-
-    private async Task GetAllNotes()
-    {
-        try
-        {
-            AllNotes = await _apiService.Get<List<NoteResponse>>("notes");
-        }
-        catch (ApplicationException ex)
-        {
-            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
-        }
+        await GetCurrentNotesCallback.InvokeAsync(new GetCurrentNotesArgs(activeNavItemType == NavItemType.Trash, filter));
     }
 }

@@ -1,18 +1,18 @@
-﻿@implements IDisposable
+﻿@using SharedModels.Responses.Notes
 @inject ApiService _apiService
 
 <div class="content-bar">
-    @if (AppState != null && AppState.ActiveNote != null)
+    @if (ActiveNote != null)
     {
-        if (AppState.ActiveNote.IsDeleted)
+        if (ActiveNote.IsDeleted)
         {
-            <div class="content-bar-item">Empty trash</div>
-            <div class="content-bar-item">Restore</div>
+            <div class="content-bar-item" @onclick="() => EmptyTrashCallback.InvokeAsync()">Empty trash</div> //put some popup to ask if they are sure
+            <div class="content-bar-item" @onclick="() => RestoreNoteCallback.InvokeAsync()">Restore</div> 
         }
         else
         {
             <div class="content-bar-item">Save</div>
-            <div class="content-bar-item">Delete</div>
+            <div class="content-bar-item" @onclick="() => DeleteNoteCallback.InvokeAsync()">Delete</div> 
         }
     }
     else
@@ -23,20 +23,14 @@
 
 @code {
     [CascadingParameter]
-    public CascadingAppState AppState { get; set; }
+    public NoteResponse ActiveNote { get; set; }
 
-    protected override void OnInitialized()
-    {
-        AppState.ActiveNoteChanged += OnActiveNoteChanged;
-    }
+    [Parameter]
+    public EventCallback DeleteNoteCallback { get; set; }
 
-    private void OnActiveNoteChanged()
-    {
-        StateHasChanged();
-    }
+    [Parameter]
+    public EventCallback RestoreNoteCallback { get; set; }
 
-    public void Dispose()
-    {
-        AppState.ActiveNoteChanged -= OnActiveNoteChanged;
-    }
+    [Parameter]
+    public EventCallback EmptyTrashCallback { get; set; }
 }
