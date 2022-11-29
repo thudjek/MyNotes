@@ -2,6 +2,8 @@
 @using SharedModels.Responses.Notes
 @using WebApp.Components.Dropdown
 @using WebApp.Components.Sidebar
+@inject ApiService _apiService
+@inject PopupMessageService _popupMessageService
 @attribute [Authorize]
 
 <CascadingAppState>
@@ -17,3 +19,19 @@
         </div>
     </div>
 </CascadingAppState>
+
+@code {
+    List<NoteResponse> allNotes;
+
+    private async Task GetAllNotes()
+    {
+        try
+        {
+            allNotes = await _apiService.Get<List<NoteResponse>>("notes");
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+}

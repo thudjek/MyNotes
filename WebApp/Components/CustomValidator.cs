@@ -5,7 +5,7 @@ namespace WebApp.Components;
 
 public class CustomValidator : ComponentBase
 {
-    private ValidationMessageStore messageStore;
+    ValidationMessageStore messageStore;
 
     [CascadingParameter]
     private EditContext EditContext { get; set; }

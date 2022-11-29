@@ -6,7 +6,7 @@ public class PopupMessageService : IDisposable
 {
     public event Action<string, PopupMessageType> OnShow;
     public event Action OnHide;
-    private Timer Countdown;
+    Timer Countdown;
 
     public void ShowPopup(string message, PopupMessageType type)
     {
