@@ -6,6 +6,8 @@
 @inject PopupMessageService _popupMessageService
 @attribute [Authorize]
 
+<Modal @ref="modal" />
+
 <CascadingValue Value="activeNote">
     <div class="main-row">
         <div class="sidebar-col">
@@ -21,6 +23,7 @@
 </CascadingValue>
 
 @code {
+    Modal modal;
     List<NoteResponse> allNotes;
     List<NoteResponse> currentNotes;
     NoteResponse activeNote;
@@ -108,16 +111,18 @@
 
     private async Task EmptyTrash()
     {
-        try
-        {
-            await _apiService.Post("notes/empty-trash");
-            await GetAllNotes();
-            GetCurrentNotes(true, filter);
-        }
-        catch (ApplicationException ex)
-        {
-            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
-        }
+        modal.SetModalContent("Empty Trash", "Are you sure you want to delete everything in trash?", "No", "Delete");
+        await modal.Show();
+        //try
+        //{
+        //    await _apiService.Post("notes/empty-trash");
+        //    await GetAllNotes();
+        //    GetCurrentNotes(true, filter);
+        //}
+        //catch (ApplicationException ex)
+        //{
+        //    _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        //}
     }
 
     private void SetActiveNote(NoteResponse note)
