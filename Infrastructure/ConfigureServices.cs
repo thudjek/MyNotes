@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SendGrid.Extensions.DependencyInjection;
 
 namespace Infrastructure;
-public static class DependencyInjection
+public static class ConfigureServices
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -39,7 +39,6 @@ public static class DependencyInjection
         });
 
         services.AddTransient<IIdentityService, IdentityService>();
-
         services.AddTransient<IDateTimeService, DateTimeService>();
         services.AddTransient<IEmailService, SendGridEmailService>();
 
