@@ -407,12 +407,11 @@ h1:focus {
 .content-bar-item {
     margin-right: 50px;
     appearance: none;
-    background-color: #FAFBFC;
     border: 1px solid rgba(27, 31, 35, 0.15);
     border-radius: 6px;
     box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
     box-sizing: border-box;
-    color: #24292E;
+    color: #24292e;
     cursor: pointer;
     display: inline-block;
     font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
@@ -429,6 +428,8 @@ h1:focus {
     vertical-align: middle;
     white-space: nowrap;
     word-wrap: break-word;
+    font-size: 15px;
+    font-weight: bold;
 }
 
 .content-bar-item:first-child {
@@ -436,20 +437,17 @@ h1:focus {
 }
 
 .content-bar-item:hover {
-    background-color: #c7c8ca;
     text-decoration: none;
     transition-duration: 0.1s;
 }
 
 .content-bar-item.disabled {
-    background-color: #FAFBFC;
     border-color: rgba(27, 31, 35, 0.15);
-    color: #959DA5;
+    color: #929da5;
     cursor: default;
 }
 
 .content-bar-item:active {
-    background-color: #EDEFF2;
     box-shadow: rgba(225, 228, 232, 0.2) 0 1px 0 inset;
     transition: none 0s;
 }
@@ -462,19 +460,43 @@ h1:focus {
     display: none;
 }
 
-.editor {
-    height: calc(100% - 120px) !important;
-    font-size: 16px !important;
-    color: #f2f2f2 !important;
+.red-btn {
+    background-color: #964f4f;
+}
+
+.red-btn:hover {
+    background-color: #933e3e;
+}
+
+.red-btn.disabled {
+    background-color: #964f4f;
+}
+
+.red-btn:active {
+    background-color: #973333;
+}
+
+.green-btn {
+    background-color: #4f9660;
+}
+
+.green-btn:hover {
+    background-color: #2c9645;
+}
+
+.green-btn.disabled {
+    background-color: #4f9660;
+}
+
+.green-btn:active {
+    background-color: #149332;
 }
 
 .title {
     background-color: #414141;
     border: 1px solid white;
-    width: 100%;
     height: 40px;
-    margin-bottom: 20px;
-    margin-top: 5px;
+    margin: 20px 20px 0 20px;
     padding: 5px 20px 5px 20px;
     color: #f2f2f2;
     font-size: 16px;
@@ -497,4 +519,42 @@ h1:focus {
 .new-note-btn:hover {
     cursor: pointer;
     color: #d8d8d8;
+}
+
+.ql-toolbar .ql-stroke {
+    fill: none !important;
+    stroke: #b9b9b9 !important;
+}
+
+.ql-toolbar .ql-fill {
+    fill: #b9b9b9 !important;
+    stroke: none !important;
+}
+
+.ql-toolbar .ql-picker {
+    color: #b9b9b9 !important;
+}
+
+.ql-toolbar .ql-active .ql-stroke {
+    fill: none !important;
+    stroke: #ffffff !important;
+}
+
+.ql-toolbar .ql-active .ql-fill {
+    fill: #ffffff !important;
+    stroke: none !important;
+}
+
+.ql-toolbar .ql-active .ql-picker {
+    color: #ffffff !important;
+}
+
+.rte-toolbar {
+    margin: 20px 20px 0 20px !important;
+}
+
+.rte-editor {
+    margin: 0 20px 0 20px !important;
+    height: 600px !important;
+    font-size: 16px !important;
 }

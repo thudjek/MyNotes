@@ -6,7 +6,7 @@
 @inject PopupMessageService _popupMessageService
 @attribute [Authorize]
 
-<Modal @ref="modal" />
+<PopupModal @ref="modal" />
 
 <CascadingValue Value="activeNote">
     <div class="main-row">
@@ -16,18 +16,19 @@
         <div class="content-col">
             <div class="content-container">
                 <ContentBar DeleteNoteCallback="DeleteNote" RestoreNoteCallback="RestoreNote" EmptyTrashCallback="EmptyTrash" />
-                <TestEditor />
+                <RichTextEditor />
             </div>
         </div>
     </div>
 </CascadingValue>
 
 @code {
-    Modal modal;
+    PopupModal modal;
     List<NoteResponse> allNotes;
     List<NoteResponse> currentNotes;
     NoteResponse activeNote;
     string filter;
+
 
     protected override async Task OnInitializedAsync()
     {

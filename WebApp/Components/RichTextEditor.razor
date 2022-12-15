@@ -1,13 +1,33 @@
-﻿@inject IJSRuntime _jsRuntime;
+﻿@using SharedModels.Responses.Notes;
 
-<div><input class="title" type="text" placeholder="Title"/></div>
-<div id="editor" class="editor"></div>
+@if (ActiveNote != null)
+{
+    <input disabled="@ActiveNote.IsDeleted" class="title" placeholder="Title" value="@title" />
+    <RichTextEdit @ref="richTextEdit" Theme="RichTextEditTheme.Snow" SubmitOnEnter="false" ToolbarPosition="Placement.Top" ReadOnly="@ActiveNote.IsDeleted">
+        <Toolbar>
+            <RichTextEditToolbarGroup>
+                <RichTextEditToolbarButton Action="RichTextEditAction.Bold" />
+                <RichTextEditToolbarButton Action="RichTextEditAction.Italic" />
+                <RichTextEditToolbarButton Action="RichTextEditAction.Underline" />
+                <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="ordered" />
+                <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="bullet" />
+            </RichTextEditToolbarGroup>
+        </Toolbar>
+    </RichTextEdit>
+}
 
 @code {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if(firstRender)
-            await _jsRuntime.InvokeVoidAsync("initRichTextEditor");
-    }
+    RichTextEdit richTextEdit;
+    string title;
 
+    [CascadingParameter]
+    public NoteResponse ActiveNote { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (ActiveNote != null)
+        {
+            title = ActiveNote.Title; //TODO.. how to get content from editor and into editor... and add some more actions in toolbar
+        }
+    }
 }

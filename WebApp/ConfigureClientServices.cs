@@ -1,4 +1,8 @@
 ﻿using Blazored.LocalStorage;
+using Blazorise;
+using Blazorise.Bootstrap5;
+using Blazorise.Icons.FontAwesome;
+using Blazorise.RichTextEdit;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -45,6 +49,12 @@ public static class ConfigureClientServices
             httpClient.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]);
         })
         .AddHttpMessageHandler<IncludeCookiesHandler>();
+
+        builder.Services.AddBlazorise()
+            .AddBootstrap5Providers()
+            .AddFontAwesomeIcons();
+
+        builder.Services.AddBlazoriseRichTextEdit();
 
         return builder;
     }

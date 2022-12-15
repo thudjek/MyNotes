@@ -10,12 +10,12 @@
             {
                 <div @onclick="() => CreateNoteCallback.InvokeAsync()" class="new-note-btn"><i class="bi bi-pencil-square"></i></div>
             }
-            <Dropdown>
-                <DropdownToggleText Id="dropdownToggleText">thudjek@gmail.com <i class="bi bi-caret-down font-14"></i></DropdownToggleText>
-                <DropdownMenu>
-                    <DropdownItem Href="logout">Logout</DropdownItem>
-                </DropdownMenu>
-            </Dropdown>
+            <MNDropdown>
+                <MNDropdownToggleText Id="dropdownToggleText">thudjek@gmail.com <i class="bi bi-caret-down font-14"></i></MNDropdownToggleText>
+                <MNDropdownMenu>
+                    <MNDropdownItem Href="logout">Logout</MNDropdownItem>
+                </MNDropdownMenu>
+            </MNDropdown>
         </div>
         <div class="sidebar-item">
             <SearchBar @ref="searchBar" FilterNotesCallback="FilterNotes" />

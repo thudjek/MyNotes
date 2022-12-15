@@ -6,13 +6,13 @@
     {
         if (ActiveNote.IsDeleted)
         {
-            <div class="content-bar-item" @onclick="() => RestoreNoteCallback.InvokeAsync()">Restore</div>
-            <div class="content-bar-item" @onclick="() => EmptyTrashCallback.InvokeAsync(false)">Empty trash</div>
+            <div class="content-bar-item green-btn" @onclick="() => RestoreNoteCallback.InvokeAsync()">Restore</div>
+            <div class="content-bar-item red-btn" @onclick="() => EmptyTrashCallback.InvokeAsync(false)">Empty trash</div>
         }
         else
         {
-            <div class="content-bar-item">Save</div>
-            <div class="content-bar-item" @onclick="() => DeleteNoteCallback.InvokeAsync()">Delete</div> 
+            <div class="content-bar-item green-btn">Save</div>
+            <div class="content-bar-item red-btn" @onclick="() => DeleteNoteCallback.InvokeAsync()">Delete</div>
         }
     }
     else
