@@ -6,9 +6,9 @@ using WebApp.Auth;
 using WebApp.HttpHandlers;
 using WebApp.Services;
 
-namespace WebApp.Extensions;
+namespace WebApp;
 
-public static class WebAssemblyHostBuilderExtensions
+public static class ConfigureClientServices
 {
     public static WebAssemblyHostBuilder AddRootComponents(this WebAssemblyHostBuilder builder)
     {

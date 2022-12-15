@@ -6,8 +6,8 @@
     {
         if (ActiveNote.IsDeleted)
         {
-            <div class="content-bar-item" @onclick="() => EmptyTrashCallback.InvokeAsync()">Empty trash</div> //put some popup to ask if they are sure
-            <div class="content-bar-item" @onclick="() => RestoreNoteCallback.InvokeAsync()">Restore</div> 
+            <div class="content-bar-item" @onclick="() => RestoreNoteCallback.InvokeAsync()">Restore</div>
+            <div class="content-bar-item" @onclick="() => EmptyTrashCallback.InvokeAsync(false)">Empty trash</div>
         }
         else
         {
@@ -32,5 +32,5 @@
     public EventCallback RestoreNoteCallback { get; set; }
 
     [Parameter]
-    public EventCallback EmptyTrashCallback { get; set; }
+    public EventCallback<bool> EmptyTrashCallback { get; set; }
 }

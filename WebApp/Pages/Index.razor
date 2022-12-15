@@ -109,20 +109,27 @@
         }
     }
 
-    private async Task EmptyTrash()
+    private async Task EmptyTrash(bool isConfirmedByModal)
     {
-        modal.SetModalContent("Empty Trash", "Are you sure you want to delete everything in trash?", "No", "Delete");
-        await modal.Show();
-        //try
-        //{
-        //    await _apiService.Post("notes/empty-trash");
-        //    await GetAllNotes();
-        //    GetCurrentNotes(true, filter);
-        //}
-        //catch (ApplicationException ex)
-        //{
-        //    _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
-        //}
+        if (isConfirmedByModal)
+        {
+            try
+            {
+                await _apiService.Post("notes/empty-trash");
+                await GetAllNotes();
+                GetCurrentNotes(true, filter);
+            }
+            catch (ApplicationException ex)
+            {
+                _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+            }
+        }
+        else
+        {
+            modal.SetModalContent(ModalType.EmptyTrashModal());
+            modal.OkButtonCallback = new EventCallback(this, () => EmptyTrash(true));
+            await modal.Show();
+        }
     }
 
     private void SetActiveNote(NoteResponse note)

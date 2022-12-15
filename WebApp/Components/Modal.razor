@@ -1,6 +1,6 @@
 ﻿@inject IJSRuntime _jsRuntime;
 
-<div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+<div class="modal fade" id="modal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -11,25 +11,35 @@
                 @body
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@closeBtnText</button>
-                <button type="button" class="btn btn-primary">@acceptBtnText</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@closeButtonText</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick="() => OkButtonCallback.InvokeAsync()">@okButtonText</button>
             </div>
         </div>
     </div>
 </div>
 
 @code {
-    string title = "Title";
-    string body = "Body";
-    string closeBtnText = "Close";
-    string acceptBtnText = "Save";
+    string title;
+    string body;
+    string okButtonText;
+    string closeButtonText;
 
-    public void SetModalContent(string title, string body, string closeBtnText, string acceptBtnText)
+    public EventCallback OkButtonCallback { get; set; }
+
+    protected override void OnInitialized()
     {
-        this.title = title;
-        this.body = body;
-        this.closeBtnText = closeBtnText;
-        this.acceptBtnText = acceptBtnText;
+        title = "";
+        body = "";
+        okButtonText = "";
+        closeButtonText = "";
+    }
+
+    public void SetModalContent(ModalType modalType)
+    {
+        title = modalType.Title;
+        body = modalType.Body;
+        okButtonText = modalType.OkButtonText;
+        closeButtonText = modalType.CloseButtonText;
         StateHasChanged();
     }
 

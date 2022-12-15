@@ -1,7 +1,6 @@
 using Application;
 using Infrastructure;
 using Serilog;
-using Serilog.Events;
 using API.Extensions;
 using API;
 
@@ -15,10 +14,7 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((ctx, lc) => lc
-        .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-        .Enrich.FromLogContext()
-        .ReadFrom.Configuration(ctx.Configuration));
+    builder.AddSerilog();
 
     builder.Services.AddApplicationServices();
     builder.Services.AddInfrastructureServices(builder.Configuration);
