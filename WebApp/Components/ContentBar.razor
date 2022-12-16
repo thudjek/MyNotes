@@ -11,7 +11,7 @@
         }
         else
         {
-            <div class="content-bar-item green-btn">Save</div>
+            <div class="content-bar-item green-btn" @onclick="() => UpdateNoteCallback.InvokeAsync()">Save</div>
             <div class="content-bar-item red-btn" @onclick="() => DeleteNoteCallback.InvokeAsync()">Delete</div>
         }
     }
@@ -26,11 +26,14 @@
     public NoteResponse ActiveNote { get; set; }
 
     [Parameter]
-    public EventCallback DeleteNoteCallback { get; set; }
-
-    [Parameter]
     public EventCallback RestoreNoteCallback { get; set; }
 
     [Parameter]
     public EventCallback<bool> EmptyTrashCallback { get; set; }
+
+    [Parameter]
+    public EventCallback UpdateNoteCallback { get; set; }
+
+    [Parameter]
+    public EventCallback DeleteNoteCallback { get; set; }
 }

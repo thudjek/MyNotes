@@ -38,6 +38,7 @@ public class GetNoteQueryHandler : IRequestHandler<GetNoteQuery, NoteResponse>
                 Id = note.Id,
                 Title = note.Title,
                 Content = note.Content,
+                Text = note.Text,
                 Owned = note.CreatedBy == _currentUserService.UserId
             };
         }

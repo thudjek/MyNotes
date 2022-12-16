@@ -54,4 +54,9 @@ public class ApiService
         var httpResponse = await _httpClient.PutAsJsonAsync(relativeUrl, request);
         return await httpResponse.Content.ReadFromJsonAsync<TResponse>();
     }
+
+    public async Task Put<TRequest>(string relativeUrl, TRequest request)
+    {
+        await _httpClient.PutAsJsonAsync(relativeUrl, request);
+    }
 }

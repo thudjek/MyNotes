@@ -8,7 +8,7 @@
             <div @onclick="() => SetActiveNote(note)" class="card note-card @(GetCssActiveClass(note)) @(GetCssMarginClass(note))">
                 <div class="card-body">
                     <h5 class="card-title">@note.Title</h5>
-                    <p class="card-text truncate">@note.Content</p>
+                    <p class="card-text truncate">@note.Text</p>
                 </div>
             </div>
         }
@@ -41,7 +41,8 @@ else
 
     private async Task SetActiveNote(NoteResponse note)
     {
-        await SetActiveNoteCallback.InvokeAsync(note);
+        if(ActiveNote.Id != note.Id)
+            await SetActiveNoteCallback.InvokeAsync(note);
     }
 
     private string GetCssMarginClass(NoteResponse note)

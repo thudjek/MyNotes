@@ -41,9 +41,10 @@ public class NotesController : ApiBaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateNote()
+    public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest request)
     {
-        await Mediator.Send(new CreateNoteCommand());
+        var command = Mapper.MapTo<CreateNoteCommand>(request);
+        await Mediator.Send(command);
         return Ok();
     }
 

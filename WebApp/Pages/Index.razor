@@ -1,5 +1,7 @@
 ﻿@page "/"
+@using SharedModels.Requests.Notes;
 @using SharedModels.Responses.Notes
+@using WebApp.Common.Exceptions;
 @using WebApp.Components.Dropdown
 @using WebApp.Components.Sidebar
 @inject ApiService _apiService
@@ -15,8 +17,8 @@
         </div>
         <div class="content-col">
             <div class="content-container">
-                <ContentBar DeleteNoteCallback="DeleteNote" RestoreNoteCallback="RestoreNote" EmptyTrashCallback="EmptyTrash" />
-                <RichTextEditor />
+                <ContentBar RestoreNoteCallback="RestoreNote" EmptyTrashCallback="EmptyTrash" UpdateNoteCallback="UpdateNote" DeleteNoteCallback="DeleteNote" />
+                <RichTextEditor @ref="richTextEditor" />
             </div>
         </div>
     </div>
@@ -24,6 +26,7 @@
 
 @code {
     PopupModal modal;
+    RichTextEditor richTextEditor;
     List<NoteResponse> allNotes;
     List<NoteResponse> currentNotes;
     NoteResponse activeNote;
@@ -66,27 +69,22 @@
             currentNotes = query.OrderByDescending(n => n.Date).ToList();
             activeNote = currentNotes.FirstOrDefault();
         }
+        else
+        {
+            if (activeNote != null)
+                activeNote = null;
+
+            currentNotes = allNotes;
+        }
     }
 
     private async Task CreateNewNote()
     {
         try
         {
-            await _apiService.Post("notes");
-            await GetAllNotes();
-            GetCurrentNotes(false, filter);
-        }
-        catch (ApplicationException ex)
-        {
-            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
-        }
-    }
-
-    private async Task DeleteNote()
-    {
-        try
-        {
-            await _apiService.Post($"notes/delete/{activeNote.Id}");
+            string defaultContent = "<p><br></p>";
+            var createNoteRequest = new CreateNoteRequest() { Content = defaultContent };
+            await _apiService.Post("notes", createNoteRequest);
             await GetAllNotes();
             GetCurrentNotes(false, filter);
         }
@@ -130,6 +128,39 @@
             modal.SetModalContent(ModalType.EmptyTrashModal());
             modal.OkButtonCallback = new EventCallback(this, () => EmptyTrash(true));
             await modal.Show();
+        }
+    }
+
+    private async Task UpdateNote()
+    {
+        try
+        {
+            var updateNoteRequest = await richTextEditor.GetUpdateNoteRequest();
+            await _apiService.Put($"notes/{activeNote.Id}", updateNoteRequest);
+            await GetAllNotes();
+            GetCurrentNotes(false, filter);
+        }
+        catch (ValidationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Errors[0], PopupMessageType.Error);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
+        }
+    }
+
+    private async Task DeleteNote()
+    {
+        try
+        {
+            await _apiService.Post($"notes/delete/{activeNote.Id}");
+            await GetAllNotes();
+            GetCurrentNotes(false, filter);
+        }
+        catch (ApplicationException ex)
+        {
+            _popupMessageService.ShowPopup(ex.Message, PopupMessageType.Error);
         }
     }
 

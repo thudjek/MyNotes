@@ -5,6 +5,7 @@ using Domain.Entities;
 namespace Application.Features.Notes.Commands;
 public class CreateNoteCommand : IRequest
 {
+    public string Content { get; set; }
 }
 
 public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand>
@@ -20,7 +21,8 @@ public class CreateNoteCommandHandler : IRequestHandler<CreateNoteCommand>
         var note = new Note()
         {
             Title = "My note",
-            Content = string.Empty
+            Content = request.Content,
+            Text = string.Empty
         };
 
         _dbContext.Notes.Add(note);

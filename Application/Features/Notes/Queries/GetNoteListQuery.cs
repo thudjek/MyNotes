@@ -32,6 +32,7 @@ public class GetNoteListQueryHandler : IRequestHandler<GetNoteListQuery, List<No
                 Id = n.Id,
                 Title = n.Title,
                 Content = n.Content,
+                Text= n.Text,
                 Owned = n.CreatedBy == _currentUserService.UserId,
                 IsDeleted = n.IsDeleted,
                 Date = n.DateModified ?? n.DateCreated

@@ -29,6 +29,7 @@ public class GetTrashQueryHandler : IRequestHandler<GetTrashQuery, List<NoteResp
                 Id = n.Id,
                 Title = n.Title,
                 Content = n.Content,
+                Text = n.Text,
                 Owned = n.CreatedBy == _currentUserService.UserId
             })
             .ToListAsync(cancellationToken);
