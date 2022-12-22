@@ -11,7 +11,7 @@
                 @body
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@closeButtonText</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="InvokeCloseButtonCallbackIfExists">@closeButtonText</button>
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @onclick="() => OkButtonCallback.InvokeAsync()">@okButtonText</button>
             </div>
         </div>
@@ -25,6 +25,7 @@
     string closeButtonText;
 
     public EventCallback OkButtonCallback { get; set; }
+    public EventCallback CloseButtonCallback { get; set; }
 
     protected override void OnInitialized()
     {
@@ -46,5 +47,11 @@
     public async Task Show()
     {
         await _jsRuntime.InvokeVoidAsync("ShowModal");
+    }
+
+    private async Task InvokeCloseButtonCallbackIfExists()
+    {
+        if (CloseButtonCallback.HasDelegate)
+            await CloseButtonCallback.InvokeAsync();
     }
 }

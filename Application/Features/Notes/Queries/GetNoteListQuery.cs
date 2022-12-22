@@ -35,7 +35,7 @@ public class GetNoteListQueryHandler : IRequestHandler<GetNoteListQuery, List<No
                 Text= n.Text,
                 Owned = n.CreatedBy == _currentUserService.UserId,
                 IsDeleted = n.IsDeleted,
-                Date = n.DateModified ?? n.DateCreated
+                Date = n.DateCreated
             })
             .ToListAsync(cancellationToken);
 

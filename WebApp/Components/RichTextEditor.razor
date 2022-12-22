@@ -24,9 +24,24 @@
     RichTextEdit richTextEdit;
     TextInput title;
     int noteId;
+    bool unsavedChanges = false;
+    bool shouldRender = true;
 
     [CascadingParameter]
     public NoteResponse ActiveNote { get; set; }
+
+    protected override bool ShouldRender()
+    {
+        if (shouldRender)
+        {
+            return true;
+        }
+        else
+        {
+            shouldRender = true;
+            return false;
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -35,10 +50,10 @@
             if (noteId != ActiveNote.Id)
             {
                 title.SetValue(ActiveNote.Title);
+                await richTextEdit.SetHtmlAsync(ActiveNote.Content);
             }
 
             noteId = ActiveNote.Id;
-            await richTextEdit.SetHtmlAsync(ActiveNote.Content);
         }
         else
         {
@@ -49,7 +64,6 @@
     public async Task<UpdateNoteRequest> GetUpdateNoteRequest()
     {
         var content = await richTextEdit.GetHtmlAsync();
-        await richTextEdit.SetHtmlAsync(content);
         var text = await richTextEdit.GetTextAsync();
 
         return new UpdateNoteRequest()

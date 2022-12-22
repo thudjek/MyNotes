@@ -1,7 +1,10 @@
-﻿<InputText disabled="@IsDisabled" class="@Class" placeholder="@Placeholder" @bind-Value="Value" />
+﻿<InputText disabled="@IsDisabled" class="@Class" placeholder="@Placeholder" @bind-Value="Value" @bind-Value:after="OnValueChanged" />
 
 @code {
     public string Value { get; private set; }
+
+    [Parameter]
+    public EventCallback ValueChanged { get; set; }
 
     [Parameter]
     public bool IsDisabled { get; set; }
@@ -16,5 +19,11 @@
     {
         Value = value;
         StateHasChanged();
+    }
+
+    public async Task OnValueChanged()
+    {
+        if(ValueChanged.HasDelegate)
+            await ValueChanged.InvokeAsync();
     }
 }

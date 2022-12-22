@@ -10,28 +10,8 @@ namespace API.Controllers;
 [Authorize]
 public class NotesController : ApiBaseController
 {
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetNote(int id)
-    {
-        var noteResponse = await Mediator.Send(new GetNoteQuery() { Id = id });
-        if (noteResponse == null)
-            return Ok();
-
-        return Ok(noteResponse);
-    }
-
     [HttpGet]
     public async Task<IActionResult> GetNoteList()
-    {
-        var noteResponseList = await Mediator.Send(new GetNoteListQuery());
-        if (noteResponseList == null)
-            return Ok();
-
-        return Ok(noteResponseList);
-    }
-
-    [HttpGet("trash")]
-    public async Task<IActionResult> GetTrashNoteList()
     {
         var noteResponseList = await Mediator.Send(new GetNoteListQuery());
         if (noteResponseList == null)

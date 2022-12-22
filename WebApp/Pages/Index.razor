@@ -1,9 +1,11 @@
 ﻿@page "/"
 @using SharedModels.Requests.Notes;
 @using SharedModels.Responses.Notes
+@using System.Security.Claims;
 @using WebApp.Common.Exceptions;
 @using WebApp.Components.Dropdown
 @using WebApp.Components.Sidebar
+@inject AuthenticationStateProvider _authStateProvider
 @inject ApiService _apiService
 @inject PopupMessageService _popupMessageService
 @attribute [Authorize]
@@ -13,7 +15,7 @@
 <CascadingValue Value="activeNote">
     <div class="main-row">
         <div class="sidebar-col">
-            <Sidebar Notes="currentNotes" GetCurrentNotesCallback="GetCurrentNotes"  CreateNoteCallback="CreateNewNote" SetActiveNoteCallback="SetActiveNote" />
+            <Sidebar Email="@email" Notes="currentNotes" GetCurrentNotesCallback="GetCurrentNotes"  CreateNoteCallback="CreateNewNote" SetActiveNoteCallback="SetActiveNote" />
         </div>
         <div class="content-col">
             <div class="content-container">
@@ -25,6 +27,7 @@
 </CascadingValue>
 
 @code {
+    string email;
     PopupModal modal;
     RichTextEditor richTextEditor;
     List<NoteResponse> allNotes;
@@ -35,6 +38,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await ((AuthStateProvider)_authStateProvider).GetAuthenticationStateAsync();
+        email = authState.User.FindFirst(c => c.Type == ClaimTypes.Email)?.Value;
+
         await GetAllNotes();
         GetCurrentNotes(false);
     }
