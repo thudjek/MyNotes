@@ -506,6 +506,24 @@ h1:focus {
     outline: none;
 }
 
+.content-textarea {
+    margin: 20px 20px 0 20px;
+    padding: 10px 20px 5px 20px;
+    height: 600px;
+    background-color: #414141;
+    color: #dddbd9;
+    resize: none;
+    font-size: 16px;
+}
+
+.content-textarea:focus {
+    outline: none;
+}
+
+.content-textarea:hover {
+    cursor: text;
+}
+
 .truncate {
     white-space: nowrap;
     overflow: hidden;
@@ -519,6 +537,10 @@ h1:focus {
 .new-note-btn:hover {
     cursor: pointer;
     color: #d8d8d8;
+}
+
+.ql-toolbar.ql-snow, .ql-container.ql-snow {
+    border: 1px solid #606060 !important;
 }
 
 .ql-toolbar .ql-stroke {

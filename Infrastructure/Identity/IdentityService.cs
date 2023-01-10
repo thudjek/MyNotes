@@ -66,7 +66,7 @@ public class IdentityService : IIdentityService
 
         var principal = GetClaimsPrincipalFromAccessToken(accessToken);
         if (principal == null)
-            return Result<TokensDto>.Failure();
+            return Result<TokensDto>.Failure("Access token or refresh token is invalid");
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
         var user = await _userManager.FindByEmailAsync(email);

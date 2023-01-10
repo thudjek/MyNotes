@@ -3,7 +3,6 @@
 
 @if (ActiveNote != null)
 {
-    <TextInput @ref="title" IsDisabled="@ActiveNote.IsDeleted" Class="title" Placeholder="Title" />
     <RichTextEdit @ref="richTextEdit" Theme="RichTextEditTheme.Snow" SubmitOnEnter="false" ToolbarPosition="Placement.Top" ReadOnly="@ActiveNote.IsDeleted">
         <Toolbar>
             <RichTextEditToolbarGroup>
@@ -22,9 +21,7 @@
 
 @code {
     RichTextEdit richTextEdit;
-    TextInput title;
     int noteId;
-    bool unsavedChanges = false;
     bool shouldRender = true;
 
     [CascadingParameter]
@@ -49,7 +46,6 @@
         {
             if (noteId != ActiveNote.Id)
             {
-                title.SetValue(ActiveNote.Title);
                 await richTextEdit.SetHtmlAsync(ActiveNote.Content);
             }
 
@@ -64,14 +60,11 @@
     public async Task<UpdateNoteRequest> GetUpdateNoteRequest()
     {
         var content = await richTextEdit.GetHtmlAsync();
-        var text = await richTextEdit.GetTextAsync();
 
         return new UpdateNoteRequest()
         {
             Id = ActiveNote.Id,
-            Title = title.Value,
-            Content = content,
-            Text = text
+            Content = content
         };
     }
 }

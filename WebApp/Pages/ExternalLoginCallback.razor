@@ -8,7 +8,7 @@
 @inject ApiService _apiService
 
 @code {
-    ExternalLoginTokensRequest externalLoginTokensRequest = new();
+    GetExternalLoginTokensRequest externalLoginTokensRequest = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -36,7 +36,7 @@
     {
         try
         {
-            var tokenResponse = await _apiService.Post<ExternalLoginTokensRequest, TokenResponse>("auth/external-login-tokens", externalLoginTokensRequest);
+            var tokenResponse = await _apiService.Post<GetExternalLoginTokensRequest, TokenResponse>("auth/external-login-tokens", externalLoginTokensRequest);
             await _localStorage.SetItemAsync("accessToken", tokenResponse.AccessToken);
             ((AuthStateProvider)_authStateProvider).NotifyUserAuthentication(tokenResponse.AccessToken);
         }

@@ -8,9 +8,7 @@ namespace Application.Features.Notes.Commands;
 public class UpdateNoteCommand : IRequest
 {
     public int Id { get; set; }
-    public string Title { get; set; }
     public string Content { get; set; }
-    public string Text { get; set; }
 }
 
 public class UpdateNoteCommandHandler : IRequestHandler<UpdateNoteCommand>
@@ -32,9 +30,7 @@ public class UpdateNoteCommandHandler : IRequestHandler<UpdateNoteCommand>
         if (note == null || note.CreatedBy != _currentUserService.UserId)
             throw new NotFoundException(nameof(Note), request.Id, _currentUserService.UserId, "Error has occurred with selected note");
 
-        note.Title = request.Title ?? string.Empty;
         note.Content = request.Content;
-        note.Text = request.Text ?? string.Empty;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 

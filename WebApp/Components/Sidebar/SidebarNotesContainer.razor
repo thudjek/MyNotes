@@ -7,8 +7,7 @@
         {
             <div @onclick="() => SetActiveNote(note)" class="card note-card @(GetCssActiveClass(note)) @(GetCssMarginClass(note))">
                 <div class="card-body">
-                    <h5 class="card-title">@note.Title</h5>
-                    <p class="card-text truncate">@note.Text</p>
+                    <p class="card-text truncate">@(!string.IsNullOrWhiteSpace(note.Content) ? note.Content : "Empty note...")</p>
                 </div>
             </div>
         }

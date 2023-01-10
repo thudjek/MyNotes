@@ -1,20 +1,35 @@
-﻿using Application.Common.Exceptions;
+﻿using Application;
+using Application.Common.Exceptions;
+using Infrastructure;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Diagnostics;
 using Serilog;
+using Serilog.Events;
 using SharedModels;
 
-namespace API;
+namespace API.Extensions;
 
-public static class ConfigureMiddleware
+public static class WebApplicationExtensions
 {
-    public static async Task ConfigureMiddlewarePipeline(this WebApplication app)
+    public static WebApplicationBuilder ConfigureBuilderAndServices(this WebApplicationBuilder builder)
+    {
+        builder.AddSerilog();
+
+        builder.Services
+            .AddApplicationServices()
+            .AddInfrastructureServices(builder.Configuration)
+            .AddAPIServices(builder.Configuration);
+
+        return builder;
+    }
+
+    public static WebApplication ConfigureApplication(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
-            await app.InitilazeDatabaseForDevelopment();
+            app.InitilazeDatabaseForDevelopment().Wait();
         }
         else
         {
@@ -34,6 +49,16 @@ public static class ConfigureMiddleware
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
+
+        return app;
+    }
+
+    private static void AddSerilog(this WebApplicationBuilder builder)
+    {
+        builder.Host.UseSerilog((ctx, lc) => lc
+            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .ReadFrom.Configuration(ctx.Configuration));
     }
 
     private static void UseApiDomainAndHttpsScheme(this WebApplication app)

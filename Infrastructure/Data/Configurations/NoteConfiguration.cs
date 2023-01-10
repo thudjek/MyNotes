@@ -11,9 +11,6 @@ public class NoteConfiguration : IEntityTypeConfiguration<Note>
             .WithOne(p => p.Note)
             .OnDelete(DeleteBehavior.ClientCascade);
 
-        builder.Property(n => n.Title)
-            .HasMaxLength(100);
-
         builder.Property(n => n.Content)
             .HasMaxLength(1000);
     }

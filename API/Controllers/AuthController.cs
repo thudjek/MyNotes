@@ -133,8 +133,7 @@ public class AuthController : ApiBaseController
     [Route("external-login-callback")]
     public async Task<IActionResult> ExternalLoginCallback()
     {
-        var command = new ExternalLoginCommand();
-        var result = await Mediator.Send(command);
+        var result = await Mediator.Send(new ExternalLoginCommand());
         if (!result.IsSuccess)
             return BadRequest(result.ToErrorModel());
 
@@ -143,9 +142,9 @@ public class AuthController : ApiBaseController
 
     [HttpPost]
     [Route("external-login-tokens")]
-    public async Task<IActionResult> ExternalLoginTokens([FromBody] ExternalLoginTokensRequest request)
+    public async Task<IActionResult> ExternalLoginTokens([FromBody] GetExternalLoginTokensRequest request)
     {
-        var command = Mapper.MapTo<ExternalLoginTokensCommand>(request);
+        var command = Mapper.MapTo<GetExternalLoginTokensCommand>(request);
         var tokensDto = await Mediator.Send(command);
         if(!string.IsNullOrWhiteSpace(tokensDto.RefreshToken))
             HttpContext.AddCookieToResponse("refreshToken", tokensDto.RefreshToken, true, _dateTimeService.Now.AddYears(1));

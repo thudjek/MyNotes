@@ -7,9 +7,7 @@ public class Note : BaseEntity
     {
         Permissions = new List<Permission>();
     }
-    public string Title { get; set; }
     public string Content { get; set; }
-    public string Text { get; set; }
     public bool IsDeleted { get; set; }
     public List<Permission> Permissions { get; private set; }
 }
